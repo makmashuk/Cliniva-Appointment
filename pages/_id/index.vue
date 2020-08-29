@@ -339,7 +339,7 @@ export default {
     selectedTime: "",
     userPhone: "",
     profileImage: "",
-    e1: 5,
+    e1: 1,
 
     phoneVerifiedData: {},
 
