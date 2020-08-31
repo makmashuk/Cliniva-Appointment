@@ -50,8 +50,6 @@
         <hr />
         <v-row>
           <v-col cols="12">
-            <p>Video Apppointment Time :</p>
-
             <v-stepper v-model="e1">
               <v-stepper-header>
                 <v-stepper-step :complete="e1 > 1" step="1">Date</v-stepper-step>
@@ -69,14 +67,17 @@
                 <v-stepper-content step="1">
                   <v-row>
                     <v-col md="8">
-                      <v-card class="mb-12 schedule">
-                        <div
-                          class="dateDiv"
-                          @click="onSelectedDate(item.date)"
-                          v-for="item in this.doctorInfo.schedules"
-                          :key="item.date"
-                          v-bind:class="{ isActive : item.date === selectedDate   }"
-                        >{{item.date}}</div>
+                      <v-card class="mb-12">
+                        <p class="cardTitle">Select Appointment Date</p>
+                        <div class="schedule">
+                          <div
+                            class="dateDiv"
+                            @click="onSelectedDate(item.date)"
+                            v-for="item in this.doctorInfo.schedules"
+                            :key="item.date"
+                            v-bind:class="{ isActive : item.date === selectedDate   }"
+                          >{{item.date}}</div>
+                        </div>
                       </v-card>
                     </v-col>
                     <v-col md="4">
@@ -93,15 +94,16 @@
                     </v-col>
                   </v-row>
 
-                  <v-btn color="primary" @click="e1 = 2">Continue</v-btn>
+                  <!-- <v-btn color="primary" @click="e1 = 2">Continue</v-btn> -->
 
-                  <v-btn text>Cancel</v-btn>
+                  <v-btn text @click="e1 = 1">Cancel</v-btn>
                 </v-stepper-content>
 
                 <v-stepper-content step="2">
                   <v-row>
                     <v-col md="8">
                       <v-card v-if="selectedDate != ''" class="mb-12">
+                        <p class="cardTitle">Select Appointment Time</p>
                         <div class="scheduleTime">
                           <div
                             class="timeDiv"
@@ -133,15 +135,17 @@
                     </v-col>
                   </v-row>
 
-                  <v-btn color="primary" @click="e1 = 3">Continue</v-btn>
+                  <!-- <v-btn color="primary" >Continue</v-btn> -->
 
-                  <v-btn text>Cancel</v-btn>
+                  <v-btn text @click="e1 = 2">Cancel</v-btn>
                 </v-stepper-content>
 
                 <v-stepper-content step="3">
                   <v-row>
                     <v-col md="8">
                       <v-card class="mb-12">
+                        <p class="cardTitle">Verify Phone Number</p>
+                        <br />
                         <v-text-field label="Phone Number" v-model="userPhone" outlined></v-text-field>
                       </v-card>
                     </v-col>
@@ -180,8 +184,25 @@
                 <v-stepper-content step="4">
                   <v-row>
                     <v-col md="8">
-                      <v-card class="mb-12">
-                        <v-row>
+                      <v-card class="mb-12 pa-3">
+                        <v-alert
+                          dense
+                          type="info"
+                        >There is already user registerted with this number.</v-alert>
+
+                        <p class="cardTitle">Select Patient Name</p>
+                        <div class="scheduleTime">
+                          <div
+                            class="timeDiv"
+                            v-for="item in this.existingAccountList"
+                            :key="item.id"
+                            @click="onSelectedPatient(item)"
+                            v-bind:class="{ isActiveTime : item === selectedPatient   }"
+                          >{{item.name}}</div>
+                        </div>
+                        <v-switch v-model="switch1" label="Create appointment with new patient"></v-switch>
+
+                        <v-row v-if="this.switch1">
                           <v-col md="6">
                             <v-text-field label="Name" v-model="userInfo.name" outlined></v-text-field>
                           </v-col>
@@ -273,48 +294,105 @@
                     </v-col>
                   </v-row>
 
-                  <v-btn color="primary" @click="bookAppointment">Continue</v-btn>
-
+                  <v-btn color="primary" @click="confirmPatient">Continue</v-btn>
                   <v-btn text>Cancel</v-btn>
                 </v-stepper-content>
                 <v-stepper-content step="5">
                   <v-row>
                     <v-col md="8">
-                      <v-simple-table>
-                        <template v-slot:default>
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td>Appointment Fee</td>
+                            <td>{{doctorInfo.pricing.package1}}</td>
+                          </tr>
+                          <tr>
+                            <td>Service Charge</td>
+                            <td>0</td>
+                          </tr>
+
+                          <tr v-if="promoAdded">
+                            <td>
+                              <v-chip
+                                class="ma-2"
+                                color="green"
+                                text-color="white"
+                              >PROMOCODE : {{this.promoEntry}}</v-chip>
+                            </td>
+                            <td>{{this.discount}}</td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <b>Total</b>
+                            </td>
+                            <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
+                          </tr>
+                          <tr>
+                            <td colspan="2">
+                              <a>Do you have Promocode ?</a>
+                              <v-switch v-model="promoSwitch" :label=" promoSwitch? 'Yes' : 'No' "></v-switch>
+                            </td>
+                          </tr>
+                          <tr v-if="promoSwitch">
+                            <td colspan="2">
+                              <v-text-field
+                                v-model="promoEntry"
+                                label="Type Promocode here"
+                                solo
+                                dense
+                              ></v-text-field>
+                              <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </v-col>
+                    <v-col md="4">
+                      <v-card class="appointmentInfo">
+                        <p class="cardTitle">Appointment Info</p>
+                        <hr />
+                        <div class="pa-3">
+                          <v-list-item-content>
+                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
+                          </v-list-item-content>
                           <tbody>
                             <tr>
-                              <td>Appointment Fee</td>
-                              <td>{{doctorInfo.pricing.package1}}</td>
-                            </tr>
-                            <tr>
-                              <td>Service Charge</td>
-                              <td>0</td>
-                            </tr>
-                            <tr>
+                              <td>Date :</td>
                               <td>
-                                <a>Do you have Promocode ?</a>
+                                <v-chip
+                                  class="ma-2"
+                                  color="green"
+                                  text-color="white"
+                                >{{this.selectedDate}}</v-chip>
                               </td>
-                              <!-- <td>
-                                <v-text-field
-                                  label="Promo"
-                                  outlined
-                                  dense
-                                ></v-text-field>
-                              </td> -->
-                            </tr>
 
-                            <tr>
+                              <td>Time :</td>
                               <td>
-                                <b>Total</b>
+                                <v-chip
+                                  class="ma-2"
+                                  color="green"
+                                  text-color="white"
+                                >{{this.selectedTime}}</v-chip>
                               </td>
-                              <td>0</td>
+                            </tr>
+                            <tr>
+                              <td colspan="2">Patient Name :</td>
+                              <td colspan="2">
+                                <v-chip
+                                  class="ma-2"
+                                  color="green"
+                                  text-color="white"
+                                >{{this.patient.name}}</v-chip>
+                              </td>
                             </tr>
                           </tbody>
-                        </template>
-                      </v-simple-table>
+                        </div>
+                      </v-card>
                     </v-col>
                   </v-row>
+                  <v-btn color="primary" @click="appointmentCreate">Create Appointment</v-btn>
+                  <v-btn text>Cancel</v-btn>
                 </v-stepper-content>
               </v-stepper-items>
             </v-stepper>
@@ -331,7 +409,11 @@
   </section>
 </template>
 <script>
+import moment from "~/node_modules/moment";
 export default {
+  components: {
+    moment
+  },
   data: () => ({
     dialog: false,
     isActive: false,
@@ -339,7 +421,18 @@ export default {
     selectedTime: "",
     userPhone: "",
     profileImage: "",
+    selectedPatient: {},
+    patient: {
+      id: "",
+      name: ""
+    },
     e1: 1,
+    switch1: false,
+    promoSwitch: false,
+    existingAccountList: [],
+    promoEntry: "",
+    discount: 0,
+    promoAdded: false,
 
     phoneVerifiedData: {},
 
@@ -412,8 +505,7 @@ export default {
   },
   methods: {
     initialize() {
-      console.log(this.$route.params.id);
-      this.profileImage = `https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.jpg`;
+      // this.profileImage = `https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.jpg`;
       fetch(
         "https://test.cliniva.com.bd/api/v1/search/doctor/id/5e9f02f83c02370ae7ce2beb"
       )
@@ -429,19 +521,80 @@ export default {
     },
     onSelectedDate(date) {
       this.selectedDate = date;
-      console.log(date);
+      this.e1 = 2;
     },
     onSelectedTime(time) {
       this.selectedTime = time;
+      this.e1 = 3;
+    },
+    onSelectedPatient(patient) {
+      this.selectedPatient = patient;
+      // this.e1 = 3;
     },
     save(date) {
       this.$refs.menu.save(date);
       console.log(date);
     },
-    bookAppointment() {
-      console.log(this.userInfo);
 
-      console.log(this.phoneVerifiedData[0].id);
+    checkPromo() {
+      console.log(this.promoEntry);
+
+      const payload = {
+        code: this.promoEntry,
+        patientId: "5f049ea9da8d09705031762a"
+      };
+
+      try {
+        const response = this.$axios
+          .$post("https://test.cliniva.com.bd/api/v1/promo/verify", payload)
+          .then(response => {
+            if (response.success) {
+              this.promoSwitch = false;
+              this.promoAdded = true;
+              this.discount = response.discount;
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      } catch (e) {
+        console.log("error");
+      }
+    },
+
+    appointmentCreate() {
+      const payload = {
+        chiefComplaints: [],
+        patientId: this.patient.id,
+        doctorId: this.$route.params.id,
+        date: moment(this.selectedDate + this.selectedTime, [
+          "YYYY-MM-DD hh:mm A"
+        ]).format(),
+        promo: this.promoEntry
+      };
+      console.log(payload);
+      try {
+        const response = this.$axios
+          .$post("https://test.cliniva.com.bd/api/v1/appointment/virtual/create", payload)
+          .then(response => {
+             console.log(response);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      } catch (e) {
+        // console.log("error");
+      }
+    },
+    confirmPatient() {
+      this.patient = this.selectedPatient;
+
+      if (this.switch1) {
+        this.patientaccountSignup();
+      }
+      this.e1 = 5;
+    },
+    patientaccountSignup() {
       const payload = {
         _id: this.phoneVerifiedData[0].id,
         name: this.userInfo.name,
@@ -459,8 +612,9 @@ export default {
             payload
           )
           .then(response => {
-            this.e1 = 5;
             console.log(response);
+            var my_array = response.data;
+            this.patient = my_array[my_array.length - 1];
           });
       } catch (e) {}
     },
@@ -482,6 +636,15 @@ export default {
           .then(res => {
             console.log(res);
             this.phoneVerifiedData = res.data;
+            this.phoneVerifiedData.reverse();
+
+            this.existingAccountList = this.phoneVerifiedData.filter(item => {
+              return item.name != "";
+            });
+
+            console.log(this.phoneVerifiedData);
+            console.log(this.existingAccountList);
+
             this.e1 = 4;
           });
       } catch (e) {}
@@ -491,11 +654,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.v-card {
-  // background-color: #10618c;
-  // color: #ffffff;
+table {
+  width: 100%;
+  tr {
+    td {
+      padding: 1em;
+    }
+  }
 }
-
 .schedule {
   display: flex;
   flex-wrap: wrap;
