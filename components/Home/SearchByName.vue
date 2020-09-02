@@ -1,58 +1,116 @@
 <template>
-  <section>
-    <v-img :aspect-ratio="16/9" :max-height="600" :src="require(`@/assets/img/banner.jpg`)">
-      <v-row class="lightbox white--text pa-2 fill-height banner">
-        <v-col offset-md="1" md="4">
-          <p class="headline">
+  <section class="py-5">
+    <div class="container">
+      <v-row class="pa-2 banner h-100">
+        <v-col md="6" class="flexBanner">
+          <p class="bannerText">
             Connect with doctor any time
             <br />you need
           </p>
         </v-col>
-        <v-col offset-md="1" md="4">
+        <v-col md="5">
           <v-text-field
             label="Search Doctor's"
-            single-line
-            solo
+            outlined
+            shaped
             v-model="searchByName"
             v-on:input="callEvent"
           ></v-text-field>
           <v-card v-if="showPreviewList">
             <v-list>
-              <v-list-item class="item" @click="$router.push(`/${item._id}`)" v-for="item in previewList" :key="item._id">
+              <v-list-item
+                class="item"
+                @click="$router.push(`/${item._id}`)"
+                v-for="item in previewList"
+                :key="item._id"
+
+              >
+                <img @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'" :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`" height="50" style="padding:0.3em;" >
                 <v-list-item-content>
                   <v-list-item-title v-text="item.name"></v-list-item-title>
                   <p class="caption">{{item.profile.speciality}}</p>
                 </v-list-item-content>
                 <p class="caption ma-2">Years Of Experience</p>
-                <v-avatar color="indigo" size="40">
+                <v-avatar color="primary" size="40">
                   <span class="white--text">{{item.experience}}</span>
                 </v-avatar>
               </v-list-item>
             </v-list>
           </v-card>
           <div class="categoryList" v-if="!showPreviewList">
-            <v-card shaped class="category" v-for="item in categoryList" :key="item.name">
+           
+            <v-card shaped class="category"  @click="openDialog(item)" v-for="item in categoryList" :key="item.name">
               <div class="icon">
-                <img :src="require(`@/assets/img/${item.icon}`)" alt />
+                <img :src="`https://api.cliniva.com.bd/resources/specialities/${item.english}.png`" />
               </div>
-              <p class="ctitle">{{item.name}}</p>
+              <p class="ctitle">{{item.bengali}}</p>
             </v-card>
           </div>
         </v-col>
       </v-row>
-    </v-img>
+    </div>
+
+    <v-row justify="center">
+      <v-dialog v-model="dialog" width="600px">
+        <v-card>
+          <v-progress-linear v-if="loader" indeterminate color="primary darken-2"></v-progress-linear>
+          <p class="cardTitle">{{this.selectedSpeciality}}</p>
+         
+          <v-list v-if="specialityDoctorList.length>0">
+            <v-list-item
+              class="item"
+              @click="$router.push(`/${item._id}`)"
+              v-for="item in specialityDoctorList"
+              :key="item._id"
+            >
+             <img @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'" :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`" height="50" style="padding:0.3em;" >
+               
+              <v-list-item-content>
+                <v-list-item-title v-text="item.name"></v-list-item-title>
+                <p class="caption">{{item.profile.speciality}}</p>
+              </v-list-item-content>
+              <p class="caption ma-2">Years Of Experience</p>
+              <v-avatar color="primary" size="40">
+                <span class="white--text">{{item.experience}}</span>
+              </v-avatar>
+            </v-list-item>
+          </v-list>
+          <p v-if="specialityDoctorList.length===0 && loader === false" class="text-center">No Doctor Available</p>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="dialog = false">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </section>
 </template>
 <style lang="scss" scoped>
+section{
+  min-height: 85vh;
+}
+.caption{
+  margin: 0;
+}
+.cardTitle {
+  background: #22acfe !important;
+  color: white !important;
+  padding: 1.5em;
+}
 .banner {
   background-color: rgba(255, 255, 255, 0.3);
   display: flex;
   justify-content: center;
-  margin-top: 7em;
-  .headline {
-    margin-top: 30%;
-    color: black;
+  .flexBanner{
+    display: flex;
+    align-items: center;
+  }
+  .bannerText {
+    color: #2aafff;
     font-weight: 500;
+    font-size: 2em;
+    font-family: cursive;
   }
   .categoryList {
     display: flex;
@@ -61,9 +119,9 @@
     max-height: 20em;
   }
   .category {
-    height: 6.5em;
+    height: 7em;
     width: 6em;
-    padding: 0.75em;
+    padding: 0.5em;
     margin: 0.3em;
     display: flex;
     justify-content: center;
@@ -75,43 +133,30 @@
       }
     }
     .ctitle {
-      font-size: small;
+      font-size: 0.65em;
       font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin: 0;
     }
     :hover {
       cursor: pointer;
     }
   }
 }
-/* width */
-::-webkit-scrollbar {
-  width: 2px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(154, 163, 212);
-}
 .v-list {
   max-height: 20em;
   overflow-y: scroll;
+  margin: 0;
+  padding: 0;
 }
 .item {
-  border-bottom: 1px solid rgb(154, 163, 212);
+  border-bottom: 2px solid #22acfe;
   padding: 0 1em;
 }
 .item:hover {
-  background: rgb(154, 163, 212);
+  // background: #22acfe;
+  // color: white;
   cursor: pointer;
 }
 </style>
@@ -122,21 +167,21 @@ export default {
     searchByName: null,
     previewList: [],
     showPreviewList: false,
-    categoryList: [
-      {
-        name: "Cardiologist",
-        icon: "icon1.png"
-      }
-     
-    
-    ]
+    categoryList: [],
+    selectedSpeciality: "",
+    specialityDoctorList: [],
+    loader: true,
+    dialog: false
   }),
+  created() {
+    this.getCategoryList();
+  },
   watch: {
-    searchByName(value){
-     if(value==""){
-       this.showPreviewList=false;
-       console.log(this.showPreviewList);
-     }
+    searchByName(value) {
+      if (value == "") {
+        this.showPreviewList = false;
+        console.log(this.showPreviewList);
+      }
     }
   },
   methods: {
@@ -152,7 +197,41 @@ export default {
           if (this.previewList.length > 0) {
             this.showPreviewList = true;
           }
-          // this.showPreviewList=false;
+        })
+        .catch(err => {
+          console.log(err);
+        })
+        .finally(() => (this.isLoading = false));
+    },
+    getCategoryList() {
+      fetch("https://test.cliniva.com.bd/api/v1/doctor/specialities")
+        .then(res => res.json())
+        .then(res => {
+          console.log(res);
+          this.categoryList = res.data;
+        })
+        .catch(err => {
+          console.log(err);
+        })
+        .finally(() => (this.isLoading = false));
+    },
+    openDialog(item) {
+      this.dialog = true;
+      this.loader = true;
+      this.specialityDoctorList = [];
+      var lat = 23.8103;
+      var lang = 90.4125;
+      this.selectedSpeciality = item.bengali;
+
+      fetch(
+        `https://test.cliniva.com.bd/api/v1/search/doctor/speciality/${item.english}/${lat}/${lang}`
+      )
+        .then(res => res.json())
+        .then(res => {
+          setTimeout(() => {
+            this.loader = false;
+            this.specialityDoctorList = res.data;
+          }, 3000);
         })
         .catch(err => {
           console.log(err);

@@ -505,9 +505,8 @@ export default {
   },
   methods: {
     initialize() {
-      // this.profileImage = `https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.jpg`;
       fetch(
-        "https://test.cliniva.com.bd/api/v1/search/doctor/id/5e9f02f83c02370ae7ce2beb"
+        `https://test.cliniva.com.bd/api/v1/search/doctor/id/${this.$route.params.id}`
       )
         .then(res => res.json())
         .then(res => {

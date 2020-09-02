@@ -2,7 +2,7 @@
   
    <section>
      <SearchByName/>
-     <SearchBySymtoms/>
+     <!-- <SearchBySymtoms/> -->
    </section>
   
 </template>
