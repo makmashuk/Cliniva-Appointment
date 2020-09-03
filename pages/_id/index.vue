@@ -1,101 +1,96 @@
 <template>
   <section>
     <div class="container">
-      <v-card class="mx-auto pa-5" tile>
-        <v-row align="center" class="fill-height">
-          <v-col align-self="start" class="pl-6" cols="6">
+      <v-card color="primary" dark class="mx-auto pa-5">
+        <v-row class="fill-height">
+          <v-col class="text-center" cols="4">
             <v-avatar class="profile" color="grey" size="164" tile>
-              <v-img :src="profileImage"></v-img>
+              <img
+                @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
+                :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.png`"
+                alt="item.name"
+              />
             </v-avatar>
-          </v-col>
-          <v-col cols="6">
-            <tbody>
-              <tr>
-                <td>Speciality :</td>
-                <td>
-                  <v-chip
-                    class="ma-2"
-                    color="green"
-                    text-color="white"
-                  >{{doctorInfo.profile.speciality}}</v-chip>
-                </td>
-              </tr>
-              <tr>
-                <td>Cases Served :</td>
-                <td>
-                  <v-chip class="ma-2" color="green" text-color="white">{{doctorInfo.caseServed}}</v-chip>
-                </td>
-              </tr>
-              <tr>
-                <td>Years Of Experience :</td>
-                <td>
-                  <v-chip class="ma-2" color="green" text-color="white">{{doctorInfo.experience}}</v-chip>
-                </td>
-              </tr>
-            </tbody>
-          </v-col>
-          <v-col cols="12">
-            <v-list-item>
+            <v-list-item class="pl-0">
               <v-list-item-content>
                 <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                <v-list-item-subtitle>{{doctorInfo.profile.speciality}}</v-list-item-subtitle>
                 <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{doctorInfo.profile.bio}}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{doctorInfo.profile.academic}}</v-list-item-subtitle>
-                <br />
               </v-list-item-content>
             </v-list-item>
           </v-col>
+          <v-col cols="8">
+            <v-list-item class="pl-0">
+              <v-list-item-content>
+                <v-list-item-subtitle>
+                  <strong>{{doctorInfo.experience}}</strong> Years Of Experience
+                </v-list-item-subtitle>
+                <v-list-item-subtitle>
+                  <strong>{{doctorInfo.caseServed}}</strong> Cases Served
+                </v-list-item-subtitle>
+                <v-list-item-subtitle>{{doctorInfo.profile.bio}}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{doctorInfo.profile.academic}}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-btn
+              outlined
+              @click="showAppointmentBooking = !showAppointmentBooking"
+              color="white"
+            >Book Appointment</v-btn>
+          </v-col>
           <v-col cols="6"></v-col>
         </v-row>
-        <hr />
+      </v-card>
+      <div v-if="showAppointmentBooking">
         <v-row>
           <v-col cols="12">
             <v-stepper v-model="e1">
               <v-stepper-header>
-                <v-stepper-step :complete="e1 > 1" step="1">Date</v-stepper-step>
+                <v-stepper-step :complete="e1 > 1" step="1">তারিখ</v-stepper-step>
                 <v-divider></v-divider>
-                <v-stepper-step :complete="e1 > 2" step="2">Time Slot</v-stepper-step>
+                <v-stepper-step :complete="e1 > 2" step="2">সময়সূচি</v-stepper-step>
                 <v-divider></v-divider>
-                <v-stepper-step :complete="e1 > 3" step="3">Phone Verification</v-stepper-step>
+                <v-stepper-step :complete="e1 > 3" step="3">ফোন নম্বর</v-stepper-step>
                 <v-divider></v-divider>
-                <v-stepper-step :complete="e1 > 4" step="4">Book Appointment</v-stepper-step>
+                <v-stepper-step :complete="e1 > 4" step="4">রোগীর তথ্য</v-stepper-step>
                 <v-divider></v-divider>
-                <v-stepper-step step="5">Payment</v-stepper-step>
+                <v-stepper-step step="5">পেমেন্ট</v-stepper-step>
               </v-stepper-header>
 
               <v-stepper-items>
                 <v-stepper-content step="1">
                   <v-row>
                     <v-col md="8">
-                      <v-card class="mb-12">
+                      <v-card outlined>
                         <p class="cardTitle">Select Appointment Date</p>
-                        <div class="schedule">
+                        <div class="selectedContainer">
                           <div
-                            class="dateDiv"
+                            class="selectedItem"
                             @click="onSelectedDate(item.date)"
                             v-for="item in this.doctorInfo.schedules"
                             :key="item.date"
                             v-bind:class="{ isActive : item.date === selectedDate   }"
-                          >{{item.date}}</div>
+                          >{{ moment(item.date).format("dddd, MMMM Do YYYY")}}</div>
                         </div>
                       </v-card>
                     </v-col>
                     <v-col md="4">
-                      <v-card class="appointmentInfo">
-                        <p class="cardTitle">Appointment Info</p>
+                      <v-card outlined class="appointmentInfo">
+                        <p class="cardTitle">
+                          <v-icon>calendar-check</v-icon>Appointment Info
+                        </p>
                         <hr />
                         <div class="pa-3">
-                          <v-list-item-content>
-                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                          </v-list-item-content>
+                          <v-list-item class="pl-0">
+                            <v-list-item-content>
+                              <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                              <v-list-item-subtitle>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-subtitle>
+                            </v-list-item-content>
+                          </v-list-item>
                         </div>
                       </v-card>
                     </v-col>
                   </v-row>
-
-                  <!-- <v-btn color="primary" @click="e1 = 2">Continue</v-btn> -->
-
                   <v-btn text @click="e1 = 1">Cancel</v-btn>
                 </v-stepper-content>
 
@@ -397,14 +392,8 @@
               </v-stepper-items>
             </v-stepper>
           </v-col>
-          <v-col cols="4">
-            <p>
-              Video Apppointment Fee :
-              <v-chip class="ma-2" color="primary" text-color="white">1000+</v-chip>
-            </p>
-          </v-col>
         </v-row>
-      </v-card>
+      </div>
     </div>
   </section>
 </template>
@@ -415,6 +404,8 @@ export default {
     moment
   },
   data: () => ({
+    moment: moment,
+    showAppointmentBooking: false,
     dialog: false,
     isActive: false,
     selectedDate: "",
@@ -574,9 +565,12 @@ export default {
       console.log(payload);
       try {
         const response = this.$axios
-          .$post("https://test.cliniva.com.bd/api/v1/appointment/virtual/create", payload)
+          .$post(
+            "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
+            payload
+          )
           .then(response => {
-             console.log(response);
+            console.log(response);
           })
           .catch(err => {
             console.log(err);
@@ -653,14 +647,36 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-table {
-  width: 100%;
-  tr {
-    td {
-      padding: 1em;
+.selectedContainer {
+  display: flex;
+  flex-wrap: wrap;
+  overflow-y: scroll;
+  min-height: 15em;
+  .selectedItem {
+    font-size: small;
+    width: 12em;
+    height: 6em;
+    color: #22acfe;
+    padding: 1em;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: bold;
+    border: 2px solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0.5em;
+    &:hover {
+      cursor: pointer;
     }
   }
+  .isActive {
+    background: #22acfe;
+    color: white;
+    border: none;
+  }
 }
+
 .schedule {
   display: flex;
   flex-wrap: wrap;
@@ -684,11 +700,7 @@ table {
       cursor: pointer;
     }
   }
-  .isActive {
-    background: #22acfe;
-    color: white;
-    border: none;
-  }
+  
 }
 .scheduleTime {
   display: flex;

@@ -17,15 +17,21 @@
             v-on:input="callEvent"
           ></v-text-field>
           <v-card v-if="showPreviewList">
+            <v-boilerplate class="mb-6" type="table-heading, list-item-two-line"></v-boilerplate>
             <v-list>
               <v-list-item
                 class="item"
                 @click="$router.push(`/${item._id}`)"
                 v-for="item in previewList"
                 :key="item._id"
-
               >
-                <img @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'" :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`" height="50" style="padding:0.3em;" >
+                <v-avatar size="40">
+                  <img
+                    @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
+                    :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
+                    alt="item.name"
+                  />
+                </v-avatar>
                 <v-list-item-content>
                   <v-list-item-title v-text="item.name"></v-list-item-title>
                   <p class="caption">{{item.profile.speciality}}</p>
@@ -38,8 +44,13 @@
             </v-list>
           </v-card>
           <div class="categoryList" v-if="!showPreviewList">
-           
-            <v-card shaped class="category"  @click="openDialog(item)" v-for="item in categoryList" :key="item.name">
+            <v-card
+              shaped
+              class="category"
+              @click="openDialog(item)"
+              v-for="item in categoryList"
+              :key="item.name"
+            >
               <div class="icon">
                 <img :src="`https://api.cliniva.com.bd/resources/specialities/${item.english}.png`" />
               </div>
@@ -55,7 +66,7 @@
         <v-card>
           <v-progress-linear v-if="loader" indeterminate color="primary darken-2"></v-progress-linear>
           <p class="cardTitle">{{this.selectedSpeciality}}</p>
-         
+
           <v-list v-if="specialityDoctorList.length>0">
             <v-list-item
               class="item"
@@ -63,8 +74,13 @@
               v-for="item in specialityDoctorList"
               :key="item._id"
             >
-             <img @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'" :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`" height="50" style="padding:0.3em;" >
-               
+              <img
+                @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
+                :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
+                height="50"
+                style="padding:0.3em;"
+              />
+
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
                 <p class="caption">{{item.profile.speciality}}</p>
@@ -75,7 +91,10 @@
               </v-avatar>
             </v-list-item>
           </v-list>
-          <p v-if="specialityDoctorList.length===0 && loader === false" class="text-center">No Doctor Available</p>
+          <p
+            v-if="specialityDoctorList.length===0 && loader === false"
+            class="text-center"
+          >No Doctor Available</p>
 
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -87,10 +106,13 @@
   </section>
 </template>
 <style lang="scss" scoped>
-section{
+section {
   min-height: 85vh;
 }
-.caption{
+.v-list-item__content{
+  padding: 12px;
+}
+.caption {
   margin: 0;
 }
 .cardTitle {
@@ -102,7 +124,7 @@ section{
   background-color: rgba(255, 255, 255, 0.3);
   display: flex;
   justify-content: center;
-  .flexBanner{
+  .flexBanner {
     display: flex;
     align-items: center;
   }
