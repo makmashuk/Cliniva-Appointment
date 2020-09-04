@@ -62,15 +62,17 @@
                   <v-row>
                     <v-col md="8">
                       <v-card outlined>
-                        <p class="cardTitle">Select Appointment Date</p>
-                        <div class="selectedContainer">
-                          <div
-                            class="selectedItem"
-                            @click="onSelectedDate(item.date)"
-                            v-for="(item,i) in this.doctorInfo.schedules"
-                            :key="i"
-                            v-bind:class="{ isActive : item.date === selectedDate   }"
-                          >{{ moment(item.date).format("dddd, MMMM Do YYYY")}}</div>
+                        <div class="content">
+                          <p class="cardTitle">Select Appointment Date</p>
+                          <div class="selectedContainer">
+                            <div
+                              class="selectedItem"
+                              @click="onSelectedDate(item.date)"
+                              v-for="(item,i) in this.doctorInfo.schedules"
+                              :key="i"
+                              v-bind:class="{ isActive : item.date === selectedDate   }"
+                            >{{ moment(item.date).format("dddd, MMMM Do YYYY")}}</div>
+                          </div>
                         </div>
                         <v-divider></v-divider>
                         <v-card-actions>
@@ -101,15 +103,17 @@
                   <v-row>
                     <v-col md="8">
                       <v-card v-if="selectedDate != ''" class="mb-12">
-                        <p class="cardTitle">Select Appointment Time</p>
-                        <div class="selectedContainer">
-                          <div
-                            class="selectedItem"
-                            v-for="(item,i) in filteredItems[0].slots"
-                            :key="i"
-                            @click="onSelectedTime(item)"
-                            v-bind:class="{ isActiveTime : item === selectedTime   }"
-                          >{{item}}</div>
+                        <div class="content">
+                          <p class="cardTitle">Select Appointment Time</p>
+                          <div class="selectedContainer">
+                            <div
+                              class="selectedItem"
+                              v-for="(item,i) in filteredItems[0].slots"
+                              :key="i"
+                              @click="onSelectedTime(item)"
+                              v-bind:class="{ isActiveTime : item === selectedTime   }"
+                            >{{item}}</div>
+                          </div>
                         </div>
                         <v-divider></v-divider>
                         <v-card-actions>
@@ -142,14 +146,16 @@
                   <v-row>
                     <v-col md="8">
                       <v-card>
-                        <p class="cardTitle">Verify Phone Number</p>
-                        <div class="py-3">
-                          <v-text-field
-                            prefix="+880"
-                            label="Phone Number"
-                            v-model="userPhone"
-                            outlined
-                          ></v-text-field>
+                        <div class="content">
+                          <p class="cardTitle">Verify Phone Number</p>
+                          <div class="py-3">
+                            <v-text-field
+                              prefix="+880"
+                              label="Phone Number"
+                              v-model="userPhone"
+                              outlined
+                            ></v-text-field>
+                          </div>
                         </div>
                         <v-divider></v-divider>
 
@@ -186,76 +192,87 @@
                     </v-col>
                   </v-row>
                 </v-stepper-content>
+
                 <v-stepper-content step="4">
                   <v-row>
                     <v-col md="8">
                       <v-card>
-                        <p class="cardTitle">Select Patient Name</p>
-                        <v-switch v-model="switch1" label="`Create appointment with new patient`"></v-switch>
+                        <div class="content">
+                          <p class="cardTitle">{{ switch1?'Create appointment with new patient':'Select Patient Name'}}</p>
+                          <v-switch
+                            v-model="switch1"
+                            label="Create appointment with new patient'"
+                          ></v-switch>
 
-                        <v-row v-if="this.switch1">
-                          <v-col md="6">
-                            <v-text-field label="Name" v-model="userInfo.name" outlined></v-text-field>
-                          </v-col>
-                          <v-col md="6">
-                            <v-text-field label="Email" v-model="userInfo.email" outlined></v-text-field>
-                          </v-col>
-                          <v-col md="6">
-                            <v-menu
-                              ref="menu"
-                              v-model="menu"
-                              :close-on-content-click="false"
-                              transition="scale-transition"
-                              offset-y
-                              min-width="290px"
-                            >
-                              <template v-slot:activator="{ on, attrs }">
-                                <v-text-field
+                          <v-row v-if="this.switch1">
+                            <v-col md="6">
+                              <v-text-field label="Name" v-model="userInfo.name" outlined></v-text-field>
+                            </v-col>
+                            <v-col md="6">
+                              <v-text-field label="Email" v-model="userInfo.email" outlined></v-text-field>
+                            </v-col>
+                            <v-col md="6">
+                              <v-menu
+                                ref="menu"
+                                v-model="menu"
+                                :close-on-content-click="false"
+                                transition="scale-transition"
+                                offset-y
+                                min-width="290px"
+                              >
+                                <template v-slot:activator="{ on, attrs }">
+                                  <v-text-field
+                                    v-model="userInfo.dob"
+                                    label="Date Of Birth"
+                                    outlined
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  ref="picker"
                                   v-model="userInfo.dob"
-                                  label="Date Of Birth"
-                                  outlined
-                                  readonly
-                                  v-bind="attrs"
-                                  v-on="on"
-                                ></v-text-field>
-                              </template>
-                              <v-date-picker
-                                ref="picker"
-                                v-model="userInfo.dob"
-                                :max="new Date().toISOString().substr(0, 10)"
-                                min="1950-01-01"
-                                @change="save"
-                              ></v-date-picker>
-                            </v-menu>
-                          </v-col>
-                          <v-col md="6">
-                            <v-select :items="items" v-model="userInfo.sex" label="Gender" outlined></v-select>
-                          </v-col>
-                          <v-col md="6">
-                            <v-text-field
-                              label="Height"
-                              suffix="cm"
-                              v-model="userInfo.height"
-                              outlined
-                            ></v-text-field>
-                          </v-col>
-                          <v-col md="6">
-                            <v-text-field
-                              label="Weight"
-                              suffix="kg"
-                              v-model="userInfo.weight"
-                              outlined
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                        <div v-if="!this.switch1" class="selectedContainer">
-                          <div
-                            class="selectedItem"
-                            v-for="item in this.existingAccountList"
-                            :key="item.id"
-                            @click="onSelectedPatient(item)"
-                            v-bind:class="{ isActive : item === selectedPatient   }"
-                          >{{item.name}}</div>
+                                  :max="new Date().toISOString().substr(0, 10)"
+                                  min="1950-01-01"
+                                  @change="save"
+                                ></v-date-picker>
+                              </v-menu>
+                            </v-col>
+                            <v-col md="6">
+                              <v-select
+                                :items="items"
+                                v-model="userInfo.sex"
+                                label="Gender"
+                                outlined
+                              ></v-select>
+                            </v-col>
+                            <v-col md="6">
+                              <v-text-field
+                                label="Height"
+                                suffix="cm"
+                                v-model="userInfo.height"
+                                outlined
+                              ></v-text-field>
+                            </v-col>
+                            <v-col md="6">
+                              <v-text-field
+                                label="Weight"
+                                suffix="kg"
+                                v-model="userInfo.weight"
+                                outlined
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                          <div v-if="!this.switch1" class="selectedContainer">
+                            <div
+                              class="selectedItem"
+                              v-for="item in this.existingAccountList"
+                              :key="item.id"
+                              @click="onSelectedPatient(item)"
+                              v-bind:class="{ isActive : item === selectedPatient   }"
+                            >{{item.name}}</div>
+                          </div>
                         </div>
                         <v-divider></v-divider>
                         <v-card-actions>
@@ -286,60 +303,61 @@
                     </v-col>
                   </v-row>
                 </v-stepper-content>
+
                 <v-stepper-content step="5">
                   <v-row>
                     <v-col md="8">
                       <v-card>
-                        <p class="cardTitle">Payment</p>
-                        <table>
-                          <tbody>
-                            <tr>
-                              <td>Appointment Fee</td>
-                              <td>{{doctorInfo.pricing.package1}}</td>
-                            </tr>
-                            <tr>
-                              <td>Service Charge</td>
-                              <td>0</td>
-                            </tr>
+                        <div class="content">
+                          <p class="cardTitle">Payment</p>
+                          <table>
+                            <tbody>
+                              <tr>
+                                <td>Appointment Fee</td>
+                                <td>{{doctorInfo.pricing.package1}}</td>
+                              </tr>
+                              <tr>
+                                <td>Service Charge</td>
+                                <td>0</td>
+                              </tr>
 
-                            <tr v-if="promoAdded">
-                              <td>
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >PROMOCODE : {{this.promoEntry}}</v-chip>
-                              </td>
-                              <td>{{this.discount}}</td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <b>Total</b>
-                              </td>
-                              <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
-                            </tr>
-                            <tr>
-                              <td colspan="2">
-                                <a>Do you have Promocode ?</a>
-                                <v-switch
-                                  v-model="promoSwitch"
-                                  :label=" promoSwitch? 'Yes' : 'No' "
-                                ></v-switch>
-                              </td>
-                            </tr>
-                            <tr v-if="promoSwitch">
-                              <td colspan="2">
-                                <v-text-field
-                                  v-model="promoEntry"
-                                  label="Type Promocode here"
-                                  solo
-                                  dense
-                                ></v-text-field>
-                                <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                              <tr v-if="promoAdded">
+                                <td>
+                                  <v-chip
+                                    class="ma-2"
+                                    color="green"
+                                    text-color="white"
+                                  >PROMOCODE : {{this.validPromoCode}}</v-chip>
+                                </td>
+                                <td>{{this.discount}}</td>
+                              </tr>
+                              <tr>
+                                <td>
+                                  <b>Total</b>
+                                </td>
+                                <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
+                              </tr>
+                              <tr>
+                                <td>
+                                  <a>Do you have Promocode ?</a>
+                                  <v-switch
+                                    v-model="promoSwitch"
+                                    :label=" promoSwitch? 'Yes' : 'No' "
+                                  ></v-switch>
+                                </td>
+                                <td v-if="promoSwitch">
+                                  <v-text-field
+                                    v-model="promoEntry"
+                                    label="Type Promocode here"
+                                    solo
+                                    dense
+                                  ></v-text-field>
+                                  <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                         <v-divider></v-divider>
 
                         <v-card-actions>
@@ -406,11 +424,14 @@ export default {
       id: "",
       name: ""
     },
+    confirmedPatient: false,
     e1: 1,
     switch1: false,
     promoSwitch: false,
     existingAccountList: [],
+
     promoEntry: "",
+    validPromoCode: "",
     discount: 0,
     promoAdded: false,
 
@@ -484,6 +505,10 @@ export default {
     this.initialize();
   },
   methods: {
+    save(date) {
+      this.$refs.menu.save(date);
+    },
+
     initialize() {
       fetch(
         `https://test.cliniva.com.bd/api/v1/search/doctor/id/${this.$route.params.id}`
@@ -491,7 +516,6 @@ export default {
         .then(res => res.json())
         .then(res => {
           this.doctorInfo = res.data;
-          console.log(this.doctorInfo);
         })
         .catch(err => {
           console.log(err);
@@ -508,37 +532,116 @@ export default {
     },
     onSelectedPatient(patient) {
       this.selectedPatient = patient;
-      // this.e1 = 3;
+      this.confirmedPatient = true;
+    
     },
-    save(date) {
-      this.$refs.menu.save(date);
-      console.log(date);
-    },
+    
 
-    checkPromo() {
-      console.log(this.promoEntry);
-
+    onPhoneVerification() {
+      this.loadingVerifyPhone = true;
       const payload = {
-        code: this.promoEntry,
-        patientId: "5f049ea9da8d09705031762a"
+        phone: "+880" + this.userPhone,
+        location: {
+          coordinates: [90.392232775, 24.746932779]
+        }
       };
 
-      try {
-        const response = this.$axios
-          .$post("https://test.cliniva.com.bd/api/v1/promo/verify", payload)
-          .then(response => {
-            if (response.success) {
-              this.promoSwitch = false;
-              this.promoAdded = true;
-              this.discount = response.discount;
-            }
-          })
-          .catch(err => {
-            console.log(err);
+      this.$axios
+        .$post(
+          "https://test.cliniva.com.bd/api/v1/patientaccount/signup/phone",
+          payload
+        )
+        .then(res => {
+          this.phoneVerifiedData = res.data;
+          this.$store.dispatch("snackbar/successMessage", res.message, {
+            root: true
           });
-      } catch (e) {
-        console.log("error");
+
+          this.phoneVerifiedData.reverse();
+
+          this.existingAccountList = this.phoneVerifiedData.filter(item => {
+            return item.name != "";
+          });
+
+          setTimeout(
+            () => ((this.loadingVerifyPhone = false), (this.e1 = 4)),
+            2000
+          );
+        });
+    },
+    confirmPatient() {
+      if (this.confirmedPatient) {
+        this.patient = this.selectedPatient;
+        this.e1 = 5;
+      } else {
+        if (this.switch1) {
+          this.patientaccountSignup();
+        } else {
+          this.$store.dispatch(
+            "snackbar/errorMessage",
+            "Please Create New Or Select from Existing",
+            { root: true }
+          );
+        }
       }
+    },
+    patientaccountSignup() {
+      const payload = {
+        _id: this.phoneVerifiedData[0].id,
+        name: this.userInfo.name,
+        dob: this.userInfo.dob,
+        sex: this.userInfo.sex,
+        height: this.userInfo.height,
+        weight: this.userInfo.weight,
+        email: this.userInfo.email
+      };
+
+      this.$axios
+        .$post(
+          "https://test.cliniva.com.bd/api/v1/patientaccount/signup",
+          payload
+        )
+        .then(response => {
+          var my_array = response.data;
+          this.patient = my_array[my_array.length - 1];
+          this.confirmedPatient = true;
+          this.e1 = 5;
+        })
+        .catch(err => {
+          this.$store.dispatch(
+            "snackbar/errorMessage",
+            "Please Create New Or Select from Existing",
+            { root: true }
+          );
+        });
+    },
+    checkPromo() {
+      const payload = {
+        code: this.promoEntry,
+        patientId: this.patient.id
+      };
+
+      this.$axios
+        .$post("https://test.cliniva.com.bd/api/v1/promo/verify", payload)
+        .then(response => {
+          if (response.success) {
+            this.validPromoCode = this.promoEntry;
+            this.promoSwitch = false;
+            this.promoAdded = true;
+            this.discount = response.discount;
+            this.$store.dispatch("snackbar/successMessage", response.message, {
+              root: true
+            });
+          }
+          if (!response.success) {
+            this.$store.dispatch("snackbar/errorMessage", response.message, {
+              root: true
+            });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
 
     appointmentCreate() {
@@ -552,101 +655,38 @@ export default {
         ]).format(),
         promo: this.promoEntry
       };
-      console.log(payload);
-      try {
-        const response = this.$axios
-          .$post(
-            "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
-            payload
-          )
-          .then(response => {
-            setTimeout(() => (
-              this.loadingAppointmentCreate = false,
-              window.location.href = response.data.redirectGatewayURL
-              
-              ), 2000);
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      } catch (e) {
-        // console.log("error");
-      }
-    },
-    confirmPatient() {
-      this.patient = this.selectedPatient;
 
-      if (this.switch1) {
-        this.patientaccountSignup();
-      }
-      this.e1 = 5;
-    },
-    patientaccountSignup() {
-      const payload = {
-        _id: this.phoneVerifiedData[0].id,
-        name: this.userInfo.name,
-        dob: this.userInfo.dob,
-        sex: this.userInfo.sex,
-        height: this.userInfo.height,
-        weight: this.userInfo.weight,
-        email: this.userInfo.email
-      };
-
-      try {
-        const response = this.$axios
-          .$post(
-            "https://test.cliniva.com.bd/api/v1/patientaccount/signup",
-            payload
-          )
-          .then(response => {
-            console.log(response);
-            var my_array = response.data;
-            this.patient = my_array[my_array.length - 1];
-          });
-      } catch (e) {}
-    },
-    async onPhoneVerification() {
-      this.loadingVerifyPhone = true;
-      const payload = {
-        phone: "+880" + this.userPhone,
-        location: {
-          coordinates: [90.392232775, 24.746932779]
-        }
-      };
-
-      try {
-        await this.$axios
-          .$post(
-            "https://test.cliniva.com.bd/api/v1/patientaccount/signup/phone",
-            payload
-          )
-          // .then(res => res.json())
-          .then(res => {
-            console.log(res);
-
-            this.phoneVerifiedData = res.data;
-
-            this.phoneVerifiedData.reverse();
-
-            this.existingAccountList = this.phoneVerifiedData.filter(item => {
-              return item.name != "";
-            });
-
-            setTimeout(
-              () => ((this.loadingVerifyPhone = false), (this.e1 = 4)),
-              3000
-            );
-
-            console.log(this.phoneVerifiedData);
-            console.log(this.existingAccountList);
-          });
-      } catch (e) {}
+      this.$axios
+        .$post(
+          "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
+          payload
+        )
+        .then(response => {
+          this.$store.dispatch(
+            "snackbar/successMessage",
+            "ধন্যবাদ। আপনার অ্যাকাউন্ট সফল ভাবে তৈরি হয়েছে।",
+            { root: true }
+          );
+          setTimeout(
+            () => (
+              (this.loadingAppointmentCreate = false),
+              (window.location.href = response.data.redirectGatewayURL)
+            ),
+            2000
+          );
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+section {
+  min-height: 85vh;
+}
 table {
   width: 100%;
   tr {
@@ -665,11 +705,14 @@ table {
     margin: 0;
   }
 }
+.content {
+  min-height: 24em;
+}
 .selectedContainer {
   display: flex;
   flex-wrap: wrap;
+  max-height: 20em;
   overflow-y: scroll;
-  height: 20em;
   .selectedItem {
     font-size: small;
     width: 12em;
