@@ -67,11 +67,15 @@
                           <div
                             class="selectedItem"
                             @click="onSelectedDate(item.date)"
-                            v-for="item in this.doctorInfo.schedules"
-                            :key="item.date"
+                            v-for="(item,i) in this.doctorInfo.schedules"
+                            :key="i"
                             v-bind:class="{ isActive : item.date === selectedDate   }"
                           >{{ moment(item.date).format("dddd, MMMM Do YYYY")}}</div>
                         </div>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                          <v-btn text @click="e1 = 1">Cancel</v-btn>
+                        </v-card-actions>
                       </v-card>
                     </v-col>
                     <v-col md="4">
@@ -91,7 +95,6 @@
                       </v-card>
                     </v-col>
                   </v-row>
-                  <v-btn text @click="e1 = 1">Cancel</v-btn>
                 </v-stepper-content>
 
                 <v-stepper-content step="2">
@@ -99,49 +102,67 @@
                     <v-col md="8">
                       <v-card v-if="selectedDate != ''" class="mb-12">
                         <p class="cardTitle">Select Appointment Time</p>
-                        <div class="scheduleTime">
+                        <div class="selectedContainer">
                           <div
-                            class="timeDiv"
-                            v-for="item in filteredItems[0].slots"
-                            :key="item"
+                            class="selectedItem"
+                            v-for="(item,i) in filteredItems[0].slots"
+                            :key="i"
                             @click="onSelectedTime(item)"
                             v-bind:class="{ isActiveTime : item === selectedTime   }"
                           >{{item}}</div>
                         </div>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                          <v-btn text>Cancel</v-btn>
+                        </v-card-actions>
                       </v-card>
                     </v-col>
                     <v-col md="4">
                       <v-card class="appointmentInfo">
                         <p class="cardTitle">Appointment Info</p>
-                        <hr />
+                        <v-divider></v-divider>
                         <div class="pa-3">
-                          <v-list-item-content>
-                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                          </v-list-item-content>
-                          <v-list-item two-line>
+                          <v-list-item class="pl-0">
                             <v-list-item-content>
-                              <v-list-item-subtitle>Date</v-list-item-subtitle>
-                              <v-list-item-title>{{this.selectedDate}}</v-list-item-title>
+                              <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                              <v-list-item-subtitle>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-subtitle>
+                              <br />
+                              <v-divider></v-divider>
+                              <br />
+                              <v-list-item-subtitle>Date : {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}</v-list-item-subtitle>
                             </v-list-item-content>
                           </v-list-item>
                         </div>
                       </v-card>
                     </v-col>
                   </v-row>
-
-                  <!-- <v-btn color="primary" >Continue</v-btn> -->
-
-                  <v-btn text @click="e1 = 2">Cancel</v-btn>
                 </v-stepper-content>
 
                 <v-stepper-content step="3">
                   <v-row>
                     <v-col md="8">
-                      <v-card class="mb-12">
+                      <v-card>
                         <p class="cardTitle">Verify Phone Number</p>
-                        <br />
-                        <v-text-field label="Phone Number" v-model="userPhone" outlined></v-text-field>
+                        <div class="py-3">
+                          <v-text-field
+                            prefix="+880"
+                            label="Phone Number"
+                            v-model="userPhone"
+                            outlined
+                          ></v-text-field>
+                        </div>
+                        <v-divider></v-divider>
+
+                        <v-card-actions>
+                          <v-btn
+                            :loading="loadingVerifyPhone"
+                            :disabled="loadingVerifyPhone"
+                            color="primary"
+                            class="white--text"
+                            @click="onPhoneVerification"
+                          >Verify Phone</v-btn>
+                          <v-btn text>Cancel</v-btn>
+                        </v-card-actions>
                       </v-card>
                     </v-col>
                     <v-col md="4">
@@ -149,53 +170,28 @@
                         <p class="cardTitle">Appointment Info</p>
                         <hr />
                         <div class="pa-3">
-                          <v-list-item-content>
-                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                          </v-list-item-content>
-
-                          <v-list-item two-line>
+                          <v-list-item class="pl-0">
                             <v-list-item-content>
-                              <v-list-item-subtitle>Date</v-list-item-subtitle>
-                              <v-list-item-title>{{this.selectedDate}}</v-list-item-title>
-                            </v-list-item-content>
-                          </v-list-item>
-
-                          <v-list-item two-line>
-                            <v-list-item-content>
-                              <v-list-item-subtitle>Time</v-list-item-subtitle>
-                              <v-list-item-title>{{this.selectedTime}}</v-list-item-title>
+                              <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                              <v-list-item-subtitle>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-subtitle>
+                              <br />
+                              <v-divider></v-divider>
+                              <br />
+                              <v-list-item-subtitle>Date : {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Time : {{ this.selectedTime }}</v-list-item-subtitle>
                             </v-list-item-content>
                           </v-list-item>
                         </div>
                       </v-card>
                     </v-col>
                   </v-row>
-
-                  <v-btn color="primary" @click="onPhoneVerification">Verify</v-btn>
-
-                  <v-btn text>Cancel</v-btn>
                 </v-stepper-content>
                 <v-stepper-content step="4">
                   <v-row>
                     <v-col md="8">
-                      <v-card class="mb-12 pa-3">
-                        <v-alert
-                          dense
-                          type="info"
-                        >There is already user registerted with this number.</v-alert>
-
+                      <v-card>
                         <p class="cardTitle">Select Patient Name</p>
-                        <div class="scheduleTime">
-                          <div
-                            class="timeDiv"
-                            v-for="item in this.existingAccountList"
-                            :key="item.id"
-                            @click="onSelectedPatient(item)"
-                            v-bind:class="{ isActiveTime : item === selectedPatient   }"
-                          >{{item.name}}</div>
-                        </div>
-                        <v-switch v-model="switch1" label="Create appointment with new patient"></v-switch>
+                        <v-switch v-model="switch1" label="`Create appointment with new patient`"></v-switch>
 
                         <v-row v-if="this.switch1">
                           <v-col md="6">
@@ -236,12 +232,36 @@
                             <v-select :items="items" v-model="userInfo.sex" label="Gender" outlined></v-select>
                           </v-col>
                           <v-col md="6">
-                            <v-text-field label="Height" v-model="userInfo.height" outlined></v-text-field>
+                            <v-text-field
+                              label="Height"
+                              suffix="cm"
+                              v-model="userInfo.height"
+                              outlined
+                            ></v-text-field>
                           </v-col>
                           <v-col md="6">
-                            <v-text-field label="Weight" v-model="userInfo.weight" outlined></v-text-field>
+                            <v-text-field
+                              label="Weight"
+                              suffix="kg"
+                              v-model="userInfo.weight"
+                              outlined
+                            ></v-text-field>
                           </v-col>
                         </v-row>
+                        <div v-if="!this.switch1" class="selectedContainer">
+                          <div
+                            class="selectedItem"
+                            v-for="item in this.existingAccountList"
+                            :key="item.id"
+                            @click="onSelectedPatient(item)"
+                            v-bind:class="{ isActive : item === selectedPatient   }"
+                          >{{item.name}}</div>
+                        </div>
+                        <v-divider></v-divider>
+                        <v-card-actions>
+                          <v-btn color="primary" @click="confirmPatient">Confirm Patient</v-btn>
+                          <v-btn text>Cancel</v-btn>
+                        </v-card-actions>
                       </v-card>
                     </v-col>
                     <v-col md="4">
@@ -249,145 +269,112 @@
                         <p class="cardTitle">Appointment Info</p>
                         <hr />
                         <div class="pa-3">
-                          <v-list-item-content>
-                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                          </v-list-item-content>
-                          <tbody>
-                            <tr>
-                              <td>Date :</td>
-                              <td>
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.selectedDate}}</v-chip>
-                              </td>
-
-                              <td>Time :</td>
-                              <td>
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.selectedTime}}</v-chip>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td colspan="2">Patient Phone :</td>
-                              <td colspan="2">
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.userPhone}}</v-chip>
-                              </td>
-                            </tr>
-                          </tbody>
+                          <v-list-item class="pl-0">
+                            <v-list-item-content>
+                              <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                              <v-list-item-subtitle>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-subtitle>
+                              <br />
+                              <v-divider></v-divider>
+                              <br />
+                              <v-list-item-subtitle>Date : {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Time : {{ this.selectedTime }}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Contact : {{ this.userPhone }}</v-list-item-subtitle>
+                            </v-list-item-content>
+                          </v-list-item>
                         </div>
                       </v-card>
                     </v-col>
                   </v-row>
-
-                  <v-btn color="primary" @click="confirmPatient">Continue</v-btn>
-                  <v-btn text>Cancel</v-btn>
                 </v-stepper-content>
                 <v-stepper-content step="5">
                   <v-row>
                     <v-col md="8">
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td>Appointment Fee</td>
-                            <td>{{doctorInfo.pricing.package1}}</td>
-                          </tr>
-                          <tr>
-                            <td>Service Charge</td>
-                            <td>0</td>
-                          </tr>
+                      <v-card>
+                        <p class="cardTitle">Payment</p>
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td>Appointment Fee</td>
+                              <td>{{doctorInfo.pricing.package1}}</td>
+                            </tr>
+                            <tr>
+                              <td>Service Charge</td>
+                              <td>0</td>
+                            </tr>
 
-                          <tr v-if="promoAdded">
-                            <td>
-                              <v-chip
-                                class="ma-2"
-                                color="green"
-                                text-color="white"
-                              >PROMOCODE : {{this.promoEntry}}</v-chip>
-                            </td>
-                            <td>{{this.discount}}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Total</b>
-                            </td>
-                            <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
-                          </tr>
-                          <tr>
-                            <td colspan="2">
-                              <a>Do you have Promocode ?</a>
-                              <v-switch v-model="promoSwitch" :label=" promoSwitch? 'Yes' : 'No' "></v-switch>
-                            </td>
-                          </tr>
-                          <tr v-if="promoSwitch">
-                            <td colspan="2">
-                              <v-text-field
-                                v-model="promoEntry"
-                                label="Type Promocode here"
-                                solo
-                                dense
-                              ></v-text-field>
-                              <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                            <tr v-if="promoAdded">
+                              <td>
+                                <v-chip
+                                  class="ma-2"
+                                  color="green"
+                                  text-color="white"
+                                >PROMOCODE : {{this.promoEntry}}</v-chip>
+                              </td>
+                              <td>{{this.discount}}</td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <b>Total</b>
+                              </td>
+                              <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
+                            </tr>
+                            <tr>
+                              <td colspan="2">
+                                <a>Do you have Promocode ?</a>
+                                <v-switch
+                                  v-model="promoSwitch"
+                                  :label=" promoSwitch? 'Yes' : 'No' "
+                                ></v-switch>
+                              </td>
+                            </tr>
+                            <tr v-if="promoSwitch">
+                              <td colspan="2">
+                                <v-text-field
+                                  v-model="promoEntry"
+                                  label="Type Promocode here"
+                                  solo
+                                  dense
+                                ></v-text-field>
+                                <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <v-divider></v-divider>
+
+                        <v-card-actions>
+                          <v-btn
+                            color="primary"
+                            :loading="loadingAppointmentCreate"
+                            :disabled="loadingAppointmentCreate"
+                            @click="appointmentCreate"
+                          >Create Appointment</v-btn>
+                          <v-btn text>Cancel</v-btn>
+                        </v-card-actions>
+                      </v-card>
                     </v-col>
                     <v-col md="4">
                       <v-card class="appointmentInfo">
                         <p class="cardTitle">Appointment Info</p>
                         <hr />
                         <div class="pa-3">
-                          <v-list-item-content>
-                            <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                            <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
-                          </v-list-item-content>
-                          <tbody>
-                            <tr>
-                              <td>Date :</td>
-                              <td>
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.selectedDate}}</v-chip>
-                              </td>
-
-                              <td>Time :</td>
-                              <td>
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.selectedTime}}</v-chip>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td colspan="2">Patient Name :</td>
-                              <td colspan="2">
-                                <v-chip
-                                  class="ma-2"
-                                  color="green"
-                                  text-color="white"
-                                >{{this.patient.name}}</v-chip>
-                              </td>
-                            </tr>
-                          </tbody>
+                          <v-list-item class="pl-0">
+                            <v-list-item-content>
+                              <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                              <v-list-item-subtitle>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-subtitle>
+                              <br />
+                              <v-divider></v-divider>
+                              <br />
+                              <v-list-item-subtitle>Date : {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Time : {{ this.selectedTime }}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Contact : {{ this.userPhone }}</v-list-item-subtitle>
+                              <v-list-item-subtitle>Patient Name : {{ this.patient.name }}</v-list-item-subtitle>
+                            </v-list-item-content>
+                          </v-list-item>
                         </div>
                       </v-card>
                     </v-col>
                   </v-row>
-                  <v-btn color="primary" @click="appointmentCreate">Create Appointment</v-btn>
-                  <v-btn text>Cancel</v-btn>
                 </v-stepper-content>
               </v-stepper-items>
             </v-stepper>
@@ -406,6 +393,8 @@ export default {
   data: () => ({
     moment: moment,
     showAppointmentBooking: false,
+    loadingVerifyPhone: false,
+    loadingAppointmentCreate: false,
     dialog: false,
     isActive: false,
     selectedDate: "",
@@ -553,6 +542,7 @@ export default {
     },
 
     appointmentCreate() {
+      this.loadingAppointmentCreate = true;
       const payload = {
         chiefComplaints: [],
         patientId: this.patient.id,
@@ -570,7 +560,11 @@ export default {
             payload
           )
           .then(response => {
-            console.log(response);
+            setTimeout(() => (
+              this.loadingAppointmentCreate = false,
+              window.location.href = response.data.redirectGatewayURL
+              
+              ), 2000);
           })
           .catch(err => {
             console.log(err);
@@ -612,8 +606,9 @@ export default {
       } catch (e) {}
     },
     async onPhoneVerification() {
+      this.loadingVerifyPhone = true;
       const payload = {
-        phone: this.userPhone,
+        phone: "+880" + this.userPhone,
         location: {
           coordinates: [90.392232775, 24.746932779]
         }
@@ -628,17 +623,22 @@ export default {
           // .then(res => res.json())
           .then(res => {
             console.log(res);
+
             this.phoneVerifiedData = res.data;
+
             this.phoneVerifiedData.reverse();
 
             this.existingAccountList = this.phoneVerifiedData.filter(item => {
               return item.name != "";
             });
 
+            setTimeout(
+              () => ((this.loadingVerifyPhone = false), (this.e1 = 4)),
+              3000
+            );
+
             console.log(this.phoneVerifiedData);
             console.log(this.existingAccountList);
-
-            this.e1 = 4;
           });
       } catch (e) {}
     }
@@ -647,11 +647,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+table {
+  width: 100%;
+  tr {
+    td {
+      padding: 1em;
+      border-bottom: 1px solid #e8dfdf;
+    }
+  }
+}
+.v-card__actions {
+  padding: 0 !important;
+  display: flex;
+  .v-btn {
+    padding: 30px;
+    width: 50%;
+    margin: 0;
+  }
+}
 .selectedContainer {
   display: flex;
   flex-wrap: wrap;
   overflow-y: scroll;
-  min-height: 15em;
+  height: 20em;
   .selectedItem {
     font-size: small;
     width: 12em;
@@ -700,7 +718,6 @@ export default {
       cursor: pointer;
     }
   }
-  
 }
 .scheduleTime {
   display: flex;
