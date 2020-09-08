@@ -1,17 +1,17 @@
 <template>
   <section>
-    <div class="container">
-      <v-card color="primary" dark class="mx-auto pa-5">
+    <v-card outlined class="mx-auto pa-5">
+      <div class="container">
         <v-row class="fill-height">
-          <v-col class="text-center" cols="4">
-            <v-avatar class="profile" color="grey" size="164" tile>
+          <v-col class="d-flex" cols="6">
+            <v-avatar class="profile" size="164">
               <img
                 @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
                 :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.png`"
                 alt="item.name"
               />
             </v-avatar>
-            <v-list-item class="pl-0">
+            <v-list-item light>
               <v-list-item-content>
                 <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
                 <v-list-item-subtitle>{{doctorInfo.profile.speciality}}</v-list-item-subtitle>
@@ -19,29 +19,116 @@
               </v-list-item-content>
             </v-list-item>
           </v-col>
-          <v-col cols="8">
-            <v-list-item class="pl-0">
+          <v-col cols="6" class="text-right" style="border-left: 1px solid gray;">
+            <v-list-item light class="pl-0">
               <v-list-item-content>
                 <v-list-item-subtitle>
-                  <strong>{{doctorInfo.experience}}</strong> Years Of Experience
+                  <strong class="greenText">{{doctorInfo.experience}}</strong> Years Of Experience
                 </v-list-item-subtitle>
                 <v-list-item-subtitle>
-                  <strong>{{doctorInfo.caseServed}}</strong> Cases Served
+                  <strong class="greenText">{{doctorInfo.caseServed}}</strong> Cases Served
                 </v-list-item-subtitle>
-                <v-list-item-subtitle>{{doctorInfo.profile.bio}}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{doctorInfo.profile.academic}}</v-list-item-subtitle>
+                <v-list-item-subtitle>
+                  <i>{{doctorInfo.profile.bio}}</i>
+                </v-list-item-subtitle>
+                <v-list-item-subtitle>
+                  <i>{{doctorInfo.profile.academic}}</i>
+                </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
-            <v-btn
-              outlined
-              @click="showAppointmentBooking = !showAppointmentBooking"
-              color="white"
-            >Book Appointment</v-btn>
           </v-col>
           <v-col cols="6"></v-col>
         </v-row>
-      </v-card>
-      <div v-if="showAppointmentBooking">
+      </div>
+    </v-card>
+    <div class="container">
+      <p>Video Appointment Booking</p>
+      <v-row>
+        <v-col md="3" class="timeSchedule" v-for="(item,i) in doctorInfo.schedules" :key="i">
+          <div class="datediv">{{ moment(item.date).format("dd, MMM Do YYYY")}}</div>
+          <div class="scroll">
+            <div
+              class="timediv"
+              @click="onAppointmentModal(item.date,time)"
+              v-for="(time,i) in item.slots"
+              :key="i"
+            >{{time}}</div>
+          </div>
+        </v-col>
+      </v-row>
+    </div>
+    <v-row justify="center">
+      <v-dialog
+        v-model="appointmentModal"
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+      >
+        <v-card>
+          <v-toolbar dark color="primary">
+            <v-btn icon dark @click="dialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Appointment At - {{ moment(this.selectedDate).format("dddd, MMMM Do YYYY")}} - {{this.selectedTime}}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            
+          </v-toolbar>
+          <v-row justify="center">
+            <v-col md="4">
+              <v-card class="pa-5" outlined>
+                <v-text-field label="Name" dense v-model="userInfo.name" outlined></v-text-field>
+
+                <v-text-field label="Email" dense v-model="userInfo.email" outlined></v-text-field>
+
+                <v-menu
+                  ref="menu"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="userInfo.dob"
+                      label="Date Of Birth"
+                      outlined
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                      dense
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    ref="picker"
+                    v-model="userInfo.dob"
+                    :max="new Date().toISOString().substr(0, 10)"
+                    min="1950-01-01"
+                    @change="save"
+                  ></v-date-picker>
+                </v-menu>
+               
+                <v-select :items="items" dense v-model="userInfo.sex" label="Gender" outlined></v-select>
+                
+                <v-text-field label="Height" dense suffix="cm" v-model="userInfo.height" outlined></v-text-field>
+                <v-text-field label="Weight" dense suffix="kg" v-model="userInfo.weight" outlined></v-text-field>
+                <v-divider></v-divider>
+                <v-card-actions>
+                  <v-btn
+                    color="primary"
+                    :loading="loadingAppointmentCreate"
+                    :disabled="loadingAppointmentCreate"
+                    @click="appointmentCreate"
+                  >Create Appointment</v-btn>
+                  <v-btn text>Cancel</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <!-- <div>
         <v-row>
           <v-col cols="12">
             <v-stepper v-model="e1">
@@ -398,8 +485,7 @@
             </v-stepper>
           </v-col>
         </v-row>
-      </div>
-    </div>
+    </div>-->
   </section>
 </template>
 <script>
@@ -409,6 +495,8 @@ export default {
     moment
   },
   data: () => ({
+    appointmentModal: false,
+
     moment: moment,
     showAppointmentBooking: false,
     loadingVerifyPhone: false,
@@ -505,6 +593,11 @@ export default {
     this.initialize();
   },
   methods: {
+    onAppointmentModal(date, time) {
+      this.appointmentModal = true;
+      this.selectedDate = date;
+      this.selectedTime = time;
+    },
     save(date) {
       this.$refs.menu.save(date);
     },
@@ -533,9 +626,7 @@ export default {
     onSelectedPatient(patient) {
       this.selectedPatient = patient;
       this.confirmedPatient = true;
-    
     },
-    
 
     onPhoneVerification() {
       this.loadingVerifyPhone = true;
@@ -686,6 +777,41 @@ export default {
 <style lang="scss" scoped>
 section {
   min-height: 85vh;
+}
+.timeSchedule {
+  border: 1px solid #e2dede;
+  border-radius: 5px;
+  text-align: center;
+  padding: 0;
+  margin-right: 5px;
+
+  div {
+    padding: 0.5em 0;
+  }
+  .datediv {
+    background: #e2dede;
+    font-weight: bold;
+    padding: 1em 0;
+  }
+  .scroll {
+    max-height: 15em;
+    overflow-y: scroll;
+  }
+  .timediv {
+    border-bottom: 1px solid #e2dede;
+    &:hover {
+      cursor: pointer;
+      background: #22acfe;
+      color: white;
+    }
+  }
+}
+.title {
+  color: #22acfe;
+  margin-bottom: 0.5em;
+}
+.greenText {
+  color: rgb(60, 240, 60);
 }
 table {
   width: 100%;
