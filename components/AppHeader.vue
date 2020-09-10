@@ -2,15 +2,19 @@
     <section>
        <div class="container">
             <div class="logo">
-             <img class="logo" :src="require(`@/assets/img/logo.png`)" alt />
+             <img class="logo" :src="require(`@/assets/img/ctlogo.png`)" alt />
         </div>
        </div>
     </section>
 </template>
 <style lang="scss" scoped>
+section{
+    background: #cacacf;
+    border: none;
+}
 .logo{
     img{
-        height: 5em;
+        height: 2.5em;
     }
 }
 </style>

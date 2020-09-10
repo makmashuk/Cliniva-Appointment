@@ -1,6 +1,6 @@
 <template>
   <section>
-    <v-card outlined class="mx-auto pa-5">
+    <v-card outlined class="mx-auto pa-5 profile">
       <div class="container">
         <v-row class="fill-height">
           <v-col class="d-flex" cols="6">
@@ -15,7 +15,7 @@
               <v-list-item-content>
                 <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
                 <v-list-item-subtitle>{{doctorInfo.profile.speciality}}</v-list-item-subtitle>
-                <v-list-item-subtitle>{{doctorInfo.profile.professional}}</v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-3">{{doctorInfo.profile.professional}}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-col>
@@ -45,7 +45,7 @@
       <p>Video Appointment Booking</p>
       <v-row>
         <v-col md="3" class="timeSchedule" v-for="(item,i) in doctorInfo.schedules" :key="i">
-          <div class="datediv">{{ moment(item.date).format("dd, MMM Do YYYY")}}</div>
+          <div class="datediv">{{ moment(item.date).format("dd, MMM Do")}}</div>
           <div class="scroll">
             <div
               class="timediv"
@@ -65,66 +65,133 @@
         transition="dialog-bottom-transition"
       >
         <v-card>
-          <v-toolbar dark color="primary">
-            <v-btn icon dark @click="dialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-            <v-toolbar-title>Appointment At - {{ moment(this.selectedDate).format("dddd, MMMM Do YYYY")}} - {{this.selectedTime}}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            
-          </v-toolbar>
-          <v-row justify="center">
-            <v-col md="4">
-              <v-card class="pa-5" outlined>
-                <v-text-field label="Name" dense v-model="userInfo.name" outlined></v-text-field>
+          <div class="container">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Appointment At - {{ moment(this.selectedDate).format("dddd, MMMM Do YYYY")}} - {{this.selectedTime}}</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-toolbar-items>
+                <v-btn dark text @click="appointmentModal = false">
+                  <v-icon>mdi-close</v-icon>Close
+                </v-btn>
+              </v-toolbar-items>
+            </v-toolbar>
+            <v-row>
+              <v-col md="6">
+                <v-card class="pa-5" outlined>
+                  <vue-tel-input class="telInput" defaultCountry="BD" v-model="userInfo.phone"></vue-tel-input>
 
-                <v-text-field label="Email" dense v-model="userInfo.email" outlined></v-text-field>
-
-                <v-menu
-                  ref="menu"
-                  v-model="menu"
-                  :close-on-content-click="false"
-                  transition="scale-transition"
-                  offset-y
-                  min-width="290px"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
+                  <v-row>
+                    <v-col>
+                      <v-text-field label="Name" v-model="userInfo.name" solo></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <v-text-field
+                        :append-icon="password ? 'mdi-eye' : 'mdi-eye-off'"
+                        :rules="[rules.required, rules.min]"
+                        :type="password ? 'text' : 'password'"
+                        solo
+                        label="Password"
+                        hint="At least 6 characters"
+                        v-model="userInfo.password"
+                        class="input-group--focused"
+                        @click:append="password = !password"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-menu
+                    ref="menu"
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="userInfo.dob"
+                        label="Date Of Birth"
+                        solo
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      ref="picker"
                       v-model="userInfo.dob"
-                      label="Date Of Birth"
-                      outlined
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                      dense
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker
-                    ref="picker"
-                    v-model="userInfo.dob"
-                    :max="new Date().toISOString().substr(0, 10)"
-                    min="1950-01-01"
-                    @change="save"
-                  ></v-date-picker>
-                </v-menu>
-               
-                <v-select :items="items" dense v-model="userInfo.sex" label="Gender" outlined></v-select>
+                      :max="new Date().toISOString().substr(0, 10)"
+                      min="1950-01-01"
+                      @change="save"
+                    ></v-date-picker>
+                  </v-menu>
+
+                  <v-row>
+                    <v-col md="6">
+                      <v-select :items="items" v-model="userInfo.sex" label="Gender" solo></v-select>
+                    </v-col>
+                    <v-col md="6">
+                      <v-text-field
+                        label="Weight"
+                        suffix="kg"
+                        number
+                        v-model="userInfo.weight"
+                        solo
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col md="6">
+                      <v-select
+                        solo
+                        :items="feet"
+                        v-model="userInfo.feet"
+                        suffix="feet"
+                        label="height"
+                      ></v-select>
+                    </v-col>
+                    <v-col md="6">
+                      <v-select solo :items="inch" v-model="userInfo.inch" suffix="inch"></v-select>
+                    </v-col>
+                  </v-row>
+
+                  <v-divider></v-divider>
+                  <v-card-actions>
+                    <v-btn color="primary" block @click="createAppointment">Book Appointment</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+              <v-col md="4" offset-md="2">
+                <v-card class="appointmentInfo">
+                  <p class="cardTitle">Appointment Info</p>
+
+                  <div class="pa-3 text-right">
+                    <v-list-item class="pl-0">
+                      <v-list-item-content>
+                        <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
+                        <v-list-item-title>Video Apppointment Fee : {{doctorInfo.pricing.package1}}</v-list-item-title>
+                        <br />
+                        <v-divider></v-divider>
+                        <br />
+                        <v-list-item-title>
+                          {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}
+                          <v-icon>event</v-icon>
+                        </v-list-item-title>
+                        <v-list-item-title>
+                          {{ this.selectedTime }}
+                          <v-icon>schedule</v-icon>
+                        </v-list-item-title>
                 
-                <v-text-field label="Height" dense suffix="cm" v-model="userInfo.height" outlined></v-text-field>
-                <v-text-field label="Weight" dense suffix="kg" v-model="userInfo.weight" outlined></v-text-field>
-                <v-divider></v-divider>
-                <v-card-actions>
-                  <v-btn
-                    color="primary"
-                    :loading="loadingAppointmentCreate"
-                    :disabled="loadingAppointmentCreate"
-                    @click="appointmentCreate"
-                  >Create Appointment</v-btn>
-                  <v-btn text>Cancel</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
+                        <v-list-item-title v-if="bookedAppointmentData.name!=''">
+                          <v-icon>account_circle</v-icon>
+                          {{bookedAppointmentData.name}}
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
         </v-card>
       </v-dialog>
     </v-row>
@@ -489,13 +556,22 @@
   </section>
 </template>
 <script>
+import { VueTelInput } from "vue-tel-input";
 import moment from "~/node_modules/moment";
 export default {
   components: {
-    moment
+    moment,
+    VueTelInput
   },
   data: () => ({
     appointmentModal: false,
+    feet: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    inch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    password:false,
+    rules: {
+      required: value => !!value || "Required.",
+      min: v => v.length >= 6 || "Min 8 characters",
+    },
 
     moment: moment,
     showAppointmentBooking: false,
@@ -526,6 +602,9 @@ export default {
     phoneVerifiedData: {},
 
     menu: false,
+    bookedAppointmentData:{
+      name:''
+    },
 
     items: [
       {
@@ -540,11 +619,13 @@ export default {
 
     userInfo: {
       name: "",
+      password: "",
       dob: "",
       sex: 0,
-      height: 0,
+      feet: 0,
+      inch: 0,
       weight: 0,
-      email: ""
+      phone: ""
     },
 
     // doctorInfo: {},
@@ -580,15 +661,7 @@ export default {
       val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
     }
   },
-  computed: {
-    filteredItems() {
-      return this.doctorInfo.schedules.filter(item => {
-        if (item.date === this.selectedDate) {
-          return item.slots;
-        }
-      });
-    }
-  },
+  computed: {},
   created() {
     this.initialize();
   },
@@ -598,6 +671,34 @@ export default {
       this.selectedDate = date;
       this.selectedTime = time;
     },
+
+    async createAppointment() {
+      const request_absolute_uri =
+        "https://test.cliniva.com.bd/api/v1/patientaccount/create";
+      const payload = {
+        phone: this.userInfo.phone,
+        password: this.userInfo.password,
+        name: this.userInfo.name,
+        dob: this.userInfo.dob,
+        sex: this.userInfo.sex,
+        height: this.userInfo.feet * 12 + this.userInfo.inch,
+        weight: parseFloat(this.userInfo.weight)
+      };
+      await this.$axios
+        .$post(request_absolute_uri, payload)
+        .then(response => {
+          console.log(response);
+          this.bookedAppointmentData = response.data;
+          this.$store.dispatch("snackbar/successMessage", `Appointment Booked for +${response.data.name}`, {
+            root: true
+          });
+        })
+        .catch(error => {
+          console.log(error);
+          this.$store.dispatch("snackbar/errorMessage", error, { root: true });
+        });
+    },
+
     save(date) {
       this.$refs.menu.save(date);
     },
@@ -615,51 +716,7 @@ export default {
         })
         .finally(() => (this.isLoading = false));
     },
-    onSelectedDate(date) {
-      this.selectedDate = date;
-      this.e1 = 2;
-    },
-    onSelectedTime(time) {
-      this.selectedTime = time;
-      this.e1 = 3;
-    },
-    onSelectedPatient(patient) {
-      this.selectedPatient = patient;
-      this.confirmedPatient = true;
-    },
 
-    onPhoneVerification() {
-      this.loadingVerifyPhone = true;
-      const payload = {
-        phone: "+880" + this.userPhone,
-        location: {
-          coordinates: [90.392232775, 24.746932779]
-        }
-      };
-
-      this.$axios
-        .$post(
-          "https://test.cliniva.com.bd/api/v1/patientaccount/signup/phone",
-          payload
-        )
-        .then(res => {
-          this.phoneVerifiedData = res.data;
-          this.$store.dispatch("snackbar/successMessage", res.message, {
-            root: true
-          });
-
-          this.phoneVerifiedData.reverse();
-
-          this.existingAccountList = this.phoneVerifiedData.filter(item => {
-            return item.name != "";
-          });
-
-          setTimeout(
-            () => ((this.loadingVerifyPhone = false), (this.e1 = 4)),
-            2000
-          );
-        });
-    },
     confirmPatient() {
       if (this.confirmedPatient) {
         this.patient = this.selectedPatient;
@@ -778,12 +835,24 @@ export default {
 section {
   min-height: 85vh;
 }
+.v-card {
+  border: none;
+  border-radius: 0;
+}
+.profile {
+  background-color: #cacacf;
+}
+.telInput {
+  border: none;
+  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  margin-bottom: 1.5em;
+  height: 3em;
+}
 .timeSchedule {
-  border: 1px solid #e2dede;
   border-radius: 5px;
   text-align: center;
-  padding: 0;
-  margin-right: 5px;
+  padding: 30px;
 
   div {
     padding: 0.5em 0;
@@ -796,6 +865,7 @@ section {
   .scroll {
     max-height: 15em;
     overflow-y: scroll;
+    border: 1px solid gainsboro;
   }
   .timediv {
     border-bottom: 1px solid #e2dede;
@@ -808,10 +878,9 @@ section {
 }
 .title {
   color: #22acfe;
-  margin-bottom: 0.5em;
 }
 .greenText {
-  color: rgb(60, 240, 60);
+  color: #659463;
 }
 table {
   width: 100%;

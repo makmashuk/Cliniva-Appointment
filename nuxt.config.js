@@ -24,7 +24,8 @@ export default {
       { hid: 'description', name: 'description', content: process.env.npm_package_description || '' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Material+Icons'}
     ]
   },
   /*
@@ -70,10 +71,12 @@ export default {
           primary: '#22acfe',
           secondary: '#b0bec5',
           anchor: '#8c9eff',
-        
+
         }
-      }
-    }
+      },
+      
+    },
+   
   },
   /*
   ** Build configuration
