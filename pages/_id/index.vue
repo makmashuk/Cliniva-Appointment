@@ -3,7 +3,7 @@
     <v-card outlined class="mx-auto pa-5 profile">
       <div class="container">
         <v-row class="fill-height">
-          <v-col class="d-flex" cols="6">
+          <v-col class="d-flex flex-column flex-md-row" cols="12" md="6">
             <v-avatar class="profile" size="164">
               <img
                 @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
@@ -19,7 +19,7 @@
               </v-list-item-content>
             </v-list-item>
           </v-col>
-          <v-col cols="6" class="text-right" style="border-left: 1px solid gray;">
+          <v-col cols="12" md="6" class="text-md-right" style="border-left: 1px solid gray;">
             <v-list-item light class="pl-0">
               <v-list-item-content>
                 <v-list-item-subtitle>
@@ -37,14 +37,13 @@
               </v-list-item-content>
             </v-list-item>
           </v-col>
-          <v-col cols="6"></v-col>
         </v-row>
       </div>
     </v-card>
     <div class="container">
       <p>Video Appointment Booking</p>
       <v-row>
-        <v-col md="3" class="timeSchedule" v-for="(item,i) in doctorInfo.schedules" :key="i">
+        <v-col cols="12" md="3" class="timeSchedule" v-for="(item,i) in doctorInfo.schedules" :key="i">
           <div class="datediv">{{ moment(item.date).format("dd, MMM Do")}}</div>
           <div class="scroll">
             <div

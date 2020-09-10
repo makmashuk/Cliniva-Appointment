@@ -2,13 +2,13 @@
   <section class="py-5">
     <div class="container">
       <v-row class="pa-2 banner h-100">
-        <v-col md="6" class="flexBanner">
+        <v-col cols="12" md="6" class="flexBanner">
           <p class="bannerText">
             Connect with doctor any time
             <br />you need
           </p>
         </v-col>
-        <v-col md="5">
+        <v-col cols="12" md="5">
           <v-text-field
             label="Search Doctor's"
             outlined

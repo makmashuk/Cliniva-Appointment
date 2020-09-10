@@ -1,4 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
+import axios from 'axios'
 
 export default {
   /*
@@ -50,6 +51,16 @@ export default {
   buildModules: [
     '@nuxtjs/vuetify',
   ],
+
+  generate: {
+    routes() {
+      return axios.get('https://my-api/users').then(res => {
+        return res.data.map(user => {
+          return '/users/' + user.id
+        })
+      })
+    }
+  },
   /*
   ** Nuxt.js modules
   */
