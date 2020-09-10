@@ -77,7 +77,7 @@
             </v-toolbar>
             <v-row>
               <v-col md="6">
-                <v-card class="pa-5" outlined>
+                <v-card v-if="!showPaymentPanel" class="pa-5" outlined>
                   <vue-tel-input class="telInput" defaultCountry="BD" v-model="userInfo.phone"></vue-tel-input>
 
                   <v-row>
@@ -105,7 +105,7 @@
                     transition="scale-transition"
                     offset-y
                     min-width="290px"
-                  >
+                    >
                     <template v-slot:activator="{ on, attrs }">
                       <v-text-field
                         v-model="userInfo.dob"
@@ -156,13 +156,66 @@
 
                   <v-divider></v-divider>
                   <v-card-actions>
-                    <v-btn color="primary" block @click="createAppointment">Book Appointment</v-btn>
+                    <v-btn color="primary" block @click="createAppointment">Confirm Appointment</v-btn>
+                  </v-card-actions>
+                </v-card>
+
+                <v-card v-if="showPaymentPanel">
+                  <p class="cardTitle">Payment</p>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>Appointment Fee</td>
+                        <td>{{doctorInfo.pricing.package1}}</td>
+                      </tr>
+                      <tr>
+                        <td>Service Charge</td>
+                        <td>0</td>
+                      </tr>
+
+                      <tr v-if="promoAdded">
+                        <td>
+                          <v-chip
+                            class="ma-2"
+                            color="green"
+                            text-color="white"
+                          >PROMOCODE : {{this.validPromoCode}}</v-chip>
+                        </td>
+                        <td>{{this.discount}}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <b>Total</b>
+                        </td>
+                        <td>{{parseInt(doctorInfo.pricing.package1) - parseInt(this.discount) }}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a>Do you have Promocode ?</a>
+                          <v-switch v-model="promoSwitch" :label=" promoSwitch? 'Yes' : 'No' "></v-switch>
+                        </td>
+                        <td v-if="promoSwitch">
+                          <v-text-field v-model="promoEntry" label="Type Promocode here" solo dense></v-text-field>
+                          <v-btn color="primary" @click="checkPromo" block>Add</v-btn>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <v-divider></v-divider>
+
+                  <v-card-actions>
+                    <v-btn
+                      color="primary"
+                      :loading="loadingAppointmentCreate"
+                      :disabled="loadingAppointmentCreate"
+                      @click="appointmentCreate"
+                    >Book Appointment</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-col>
               <v-col md="4" offset-md="2">
-                <v-card class="appointmentInfo">
-                  <p class="cardTitle">Appointment Info</p>
+                <v-card class="appointmentInfo w-100">
+                  <p class="cardTitle text-right h1">Appointment Info</p>
 
                   <div class="pa-3 text-right">
                     <v-list-item class="pl-0">
@@ -180,10 +233,10 @@
                           {{ this.selectedTime }}
                           <v-icon>schedule</v-icon>
                         </v-list-item-title>
-                
-                        <v-list-item-title v-if="bookedAppointmentData.name!=''">
-                          <v-icon>account_circle</v-icon>
+
+                        <v-list-item-title v-if="showPaymentPanel">
                           {{bookedAppointmentData.name}}
+                          <v-icon>account_circle</v-icon>
                         </v-list-item-title>
                       </v-list-item-content>
                     </v-list-item>
@@ -567,11 +620,12 @@ export default {
     appointmentModal: false,
     feet: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     inch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    password:false,
+    password: false,
     rules: {
       required: value => !!value || "Required.",
-      min: v => v.length >= 6 || "Min 8 characters",
+      min: v => v.length >= 6 || "Min 8 characters"
     },
+    showPaymentPanel: false,
 
     moment: moment,
     showAppointmentBooking: false,
@@ -579,31 +633,28 @@ export default {
     loadingAppointmentCreate: false,
     dialog: false,
     isActive: false,
+
     selectedDate: "",
     selectedTime: "",
-    userPhone: "",
-    profileImage: "",
-    selectedPatient: {},
-    patient: {
-      id: "",
-      name: ""
-    },
-    confirmedPatient: false,
-    e1: 1,
-    switch1: false,
-    promoSwitch: false,
-    existingAccountList: [],
 
+    profileImage: "",
+
+    patientId:0,
+  
+    
+
+    
+    
+    promoSwitch: false,
     promoEntry: "",
     validPromoCode: "",
     discount: 0,
     promoAdded: false,
 
-    phoneVerifiedData: {},
 
     menu: false,
-    bookedAppointmentData:{
-      name:''
+    bookedAppointmentData: {
+      name: ""
     },
 
     items: [
@@ -689,13 +740,84 @@ export default {
         .then(response => {
           console.log(response);
           this.bookedAppointmentData = response.data;
-          this.$store.dispatch("snackbar/successMessage", `Appointment Booked for +${response.data.name}`, {
-            root: true
-          });
+          this.showPaymentPanel = true;
+          this.patientId =response.data._id;
+          console.log(this.patientId);
+          this.$store.dispatch(
+            "snackbar/successMessage",
+            `Appointment Booked for +${response.data.name}`,
+            {
+              root: true
+            }
+          );
         })
         .catch(error => {
           console.log(error);
           this.$store.dispatch("snackbar/errorMessage", error, { root: true });
+        });
+    },
+     checkPromo() {
+      const payload = {
+        code: this.promoEntry,
+        patientId:this.patientId
+      };
+
+      this.$axios
+        .$post("https://test.cliniva.com.bd/api/v1/promo/verify", payload)
+        .then(response => {
+          if (response.success) {
+            this.validPromoCode = this.promoEntry;
+            this.promoSwitch = false;
+            this.promoAdded = true;
+            this.discount = response.discount;
+            this.$store.dispatch("snackbar/successMessage", response.message, {
+              root: true
+            });
+          }
+          if (!response.success) {
+            this.$store.dispatch("snackbar/errorMessage", response.message, {
+              root: true
+            });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+    appointmentCreate() {
+      this.loadingAppointmentCreate = true;
+      const payload = {
+        chiefComplaints: [],
+        patientId: this.patientId,
+        doctorId: this.$route.params.id,
+        date: moment(this.selectedDate + this.selectedTime, [
+          "YYYY-MM-DD hh:mm A"
+        ]).format(),
+        promo: this.promoEntry
+      };
+
+      this.$axios
+        .$post(
+          "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
+          payload
+        )
+        .then(response => {
+          this.$store.dispatch(
+            "snackbar/successMessage",
+            "ধন্যবাদ। আপনার অ্যাকাউন্ট সফল ভাবে তৈরি হয়েছে।",
+            { root: true }
+          );
+          setTimeout(
+            () => (
+              (this.loadingAppointmentCreate = false),
+              (window.location.href = response.data.redirectGatewayURL)
+            ),
+            2000
+          );
+        })
+        .catch(err => {
+          console.log(err);
         });
     },
 
@@ -716,6 +838,9 @@ export default {
         })
         .finally(() => (this.isLoading = false));
     },
+
+
+
 
     confirmPatient() {
       if (this.confirmedPatient) {
@@ -763,70 +888,7 @@ export default {
           );
         });
     },
-    checkPromo() {
-      const payload = {
-        code: this.promoEntry,
-        patientId: this.patient.id
-      };
-
-      this.$axios
-        .$post("https://test.cliniva.com.bd/api/v1/promo/verify", payload)
-        .then(response => {
-          if (response.success) {
-            this.validPromoCode = this.promoEntry;
-            this.promoSwitch = false;
-            this.promoAdded = true;
-            this.discount = response.discount;
-            this.$store.dispatch("snackbar/successMessage", response.message, {
-              root: true
-            });
-          }
-          if (!response.success) {
-            this.$store.dispatch("snackbar/errorMessage", response.message, {
-              root: true
-            });
-          }
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    },
-
-    appointmentCreate() {
-      this.loadingAppointmentCreate = true;
-      const payload = {
-        chiefComplaints: [],
-        patientId: this.patient.id,
-        doctorId: this.$route.params.id,
-        date: moment(this.selectedDate + this.selectedTime, [
-          "YYYY-MM-DD hh:mm A"
-        ]).format(),
-        promo: this.promoEntry
-      };
-
-      this.$axios
-        .$post(
-          "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
-          payload
-        )
-        .then(response => {
-          this.$store.dispatch(
-            "snackbar/successMessage",
-            "ধন্যবাদ। আপনার অ্যাকাউন্ট সফল ভাবে তৈরি হয়েছে।",
-            { root: true }
-          );
-          setTimeout(
-            () => (
-              (this.loadingAppointmentCreate = false),
-              (window.location.href = response.data.redirectGatewayURL)
-            ),
-            2000
-          );
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }
+   
   }
 };
 </script>
@@ -852,7 +914,7 @@ section {
 .timeSchedule {
   border-radius: 5px;
   text-align: center;
-  padding: 30px;
+  padding: 10px 30px;
 
   div {
     padding: 0.5em 0;
@@ -863,7 +925,7 @@ section {
     padding: 1em 0;
   }
   .scroll {
-    max-height: 15em;
+    max-height: 16em;
     overflow-y: scroll;
     border: 1px solid gainsboro;
   }
@@ -895,9 +957,9 @@ table {
   padding: 0 !important;
   display: flex;
   .v-btn {
-    padding: 30px;
-    width: 50%;
+    padding: 25px;
     margin: 0;
+    width: 100%;
   }
 }
 .content {

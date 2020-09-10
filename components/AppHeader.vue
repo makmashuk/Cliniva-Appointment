@@ -1,7 +1,7 @@
 <template>
     <section>
        <div class="container">
-            <div class="logo">
+            <div class="logo" @click="$router.push('/')">
              <img class="logo" :src="require(`@/assets/img/ctlogo.png`)" alt />
         </div>
        </div>
