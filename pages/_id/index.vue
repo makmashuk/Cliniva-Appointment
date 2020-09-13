@@ -6,7 +6,7 @@
           <v-col class="d-flex flex-column flex-md-row" cols="12" md="6">
             <v-avatar class="profile" size="164">
               <img
-                @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
+                @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
                 :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.png`"
                 alt="item.name"
               />
@@ -43,7 +43,13 @@
     <div class="container">
       <p>Video Appointment Booking</p>
       <v-row>
-        <v-col cols="12" md="3" class="timeSchedule" v-for="(item,i) in doctorInfo.schedules" :key="i">
+        <v-col
+          cols="12"
+          md="3"
+          class="timeSchedule"
+          v-for="(item,i) in doctorInfo.schedules"
+          :key="i"
+        >
           <div class="datediv">{{ moment(item.date).format("dd, MMM Do")}}</div>
           <div class="scroll">
             <div
@@ -104,7 +110,7 @@
                     transition="scale-transition"
                     offset-y
                     min-width="290px"
-                    >
+                  >
                     <template v-slot:activator="{ on, attrs }">
                       <v-text-field
                         v-model="userInfo.dob"
@@ -155,7 +161,13 @@
 
                   <v-divider></v-divider>
                   <v-card-actions>
-                    <v-btn color="primary" block @click="createAppointment">Confirm Appointment</v-btn>
+                    <v-btn
+                      color="primary"
+                      :loading="loadingConfirmAppointment"
+                      :disabled="loadingConfirmAppointment"
+                      block
+                      @click="confirmAppointment"
+                    >Confirm Appointment</v-btn>
                   </v-card-actions>
                 </v-card>
 
@@ -633,23 +645,20 @@ export default {
     dialog: false,
     isActive: false,
 
+    loadingConfirmAppointment: false,
+
     selectedDate: "",
     selectedTime: "",
 
     profileImage: "",
 
-    patientId:0,
-  
-    
+    patientId: 0,
 
-    
-    
     promoSwitch: false,
     promoEntry: "",
     validPromoCode: "",
     discount: 0,
     promoAdded: false,
-
 
     menu: false,
     bookedAppointmentData: {
@@ -722,7 +731,8 @@ export default {
       this.selectedTime = time;
     },
 
-    async createAppointment() {
+    async confirmAppointment() {
+      this.loadingConfirmAppointment = true;
       const request_absolute_uri =
         "https://test.cliniva.com.bd/api/v1/patientaccount/create";
       const payload = {
@@ -737,14 +747,21 @@ export default {
       await this.$axios
         .$post(request_absolute_uri, payload)
         .then(response => {
-          console.log(response);
+          setTimeout(
+            () => (
+              (this.loadingConfirmAppointment = false),
+              (this.showPaymentPanel = true)
+            
+            ),
+            2000
+          );
           this.bookedAppointmentData = response.data;
-          this.showPaymentPanel = true;
-          this.patientId =response.data._id;
-          console.log(this.patientId);
+
+          this.patientId = response.data._id;
+        
           this.$store.dispatch(
             "snackbar/successMessage",
-            `Appointment Booked for +${response.data.name}`,
+            `Appointment Booked`,
             {
               root: true
             }
@@ -752,13 +769,14 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          this.loadingConfirmAppointment = false;
           this.$store.dispatch("snackbar/errorMessage", error, { root: true });
         });
     },
-     checkPromo() {
+    checkPromo() {
       const payload = {
         code: this.promoEntry,
-        patientId:this.patientId
+        patientId: this.patientId
       };
 
       this.$axios
@@ -784,7 +802,7 @@ export default {
         });
     },
 
-    appointmentCreate() {
+    async appointmentCreate() {
       this.loadingAppointmentCreate = true;
       const payload = {
         chiefComplaints: [],
@@ -796,7 +814,7 @@ export default {
         promo: this.promoEntry
       };
 
-      this.$axios
+      await this.$axios
         .$post(
           "https://test.cliniva.com.bd/api/v1/appointment/virtual/create",
           payload
@@ -807,10 +825,14 @@ export default {
             "ধন্যবাদ। আপনার অ্যাকাউন্ট সফল ভাবে তৈরি হয়েছে।",
             { root: true }
           );
+          console.log(response);
           setTimeout(
             () => (
               (this.loadingAppointmentCreate = false),
-              (window.location.href = response.data.redirectGatewayURL)
+              // (this.$router.push(response.data.GatewayPageURL))
+              // (window.open(response.data.GatewayPageURL, "_blank"))
+
+              (window.location.href = response.data.GatewayPageURL)
             ),
             2000
           );
@@ -833,61 +855,11 @@ export default {
           this.doctorInfo = res.data;
         })
         .catch(err => {
-          console.log(err);
+          console.log("appointmentCreate ERR");
         })
         .finally(() => (this.isLoading = false));
     },
 
-
-
-
-    confirmPatient() {
-      if (this.confirmedPatient) {
-        this.patient = this.selectedPatient;
-        this.e1 = 5;
-      } else {
-        if (this.switch1) {
-          this.patientaccountSignup();
-        } else {
-          this.$store.dispatch(
-            "snackbar/errorMessage",
-            "Please Create New Or Select from Existing",
-            { root: true }
-          );
-        }
-      }
-    },
-    patientaccountSignup() {
-      const payload = {
-        _id: this.phoneVerifiedData[0].id,
-        name: this.userInfo.name,
-        dob: this.userInfo.dob,
-        sex: this.userInfo.sex,
-        height: this.userInfo.height,
-        weight: this.userInfo.weight,
-        email: this.userInfo.email
-      };
-
-      this.$axios
-        .$post(
-          "https://test.cliniva.com.bd/api/v1/patientaccount/signup",
-          payload
-        )
-        .then(response => {
-          var my_array = response.data;
-          this.patient = my_array[my_array.length - 1];
-          this.confirmedPatient = true;
-          this.e1 = 5;
-        })
-        .catch(err => {
-          this.$store.dispatch(
-            "snackbar/errorMessage",
-            "Please Create New Or Select from Existing",
-            { root: true }
-          );
-        });
-    },
-   
   }
 };
 </script>

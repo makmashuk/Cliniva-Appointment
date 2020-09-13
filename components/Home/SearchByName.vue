@@ -27,7 +27,7 @@
               >
                 <v-avatar size="40">
                   <img
-                    @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
+                    @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
                     :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
                     alt="item.name"
                   />
@@ -74,12 +74,13 @@
               v-for="item in specialityDoctorList"
               :key="item._id"
             >
-              <img
-                @error="$event.target.src='https://test.cliniva.com.bd/resources/doctorProfilePic/5e8f12a20e72e80b1762e0b8.jpg'"
-                :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
-                height="50"
-                style="padding:0.3em;"
-              />
+              <v-avatar size="40">
+                <img
+                  @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
+                  :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
+                  alt="item.name"
+                />
+              </v-avatar>
 
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
@@ -109,7 +110,7 @@
 section {
   min-height: 85vh;
 }
-.v-list-item__content{
+.v-list-item__content {
   padding: 12px;
 }
 .caption {
