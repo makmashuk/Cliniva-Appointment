@@ -28,7 +28,7 @@
                 <v-avatar size="40">
                   <img
                     @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
-                    :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
+                    :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.jpg`"
                     alt="item.name"
                   />
                 </v-avatar>
@@ -77,7 +77,7 @@
               <v-avatar size="40">
                 <img
                   @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
-                  :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.png`"
+                  :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${item._id}.jpg`"
                   alt="item.name"
                 />
               </v-avatar>

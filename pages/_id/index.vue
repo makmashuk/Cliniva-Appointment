@@ -127,13 +127,13 @@
                   <v-row>
                     <v-col>
                       <div>
-                        <v-chip class="mr-2" @click="selectGender(0)">
+                        <v-chip :class="userInfo.sex === 0 ? 'activeGender mr-2':'mr-2' " @click="selectGender(0)">
                           Male
                         </v-chip>
-                        <v-chip class="mr-2" @click="selectGender(1)">
+                        <v-chip :class="userInfo.sex === 1 ? 'activeGender mr-2':'mr-2' " @click="selectGender(1)">
                           Female
                         </v-chip>
-                        <v-chip class="mr-2" @click="selectGender(2)">
+                        <v-chip :class="userInfo.sex === 2 ? 'activeGender mr-2':'mr-2' " @click="selectGender(2)">
                           Other
                         </v-chip>
                       </div>
@@ -258,18 +258,18 @@
                         <v-divider></v-divider>
                         <br />
                         <v-list-item-title>
-                          {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}
                           <v-icon>event</v-icon>
+                          {{ moment(selectedDate).format("dddd, MMMM Do YYYY")}}
                         </v-list-item-title>
                         <v-list-item-title>
-                          {{ this.selectedTime }}
                           <v-icon>schedule</v-icon>
+                          {{ this.selectedTime }}
                         </v-list-item-title>
 
-                        <v-list-item-title v-if="showPaymentPanel">
+                        <!-- <v-list-item-title v-if="showPaymentPanel">
                           {{bookedAppointmentData.name}}
                           <v-icon>account_circle</v-icon>
-                        </v-list-item-title>
+                        </v-list-item-title> -->
                       </v-list-item-content>
                     </v-list-item>
                   </div>
@@ -700,7 +700,8 @@ export default {
     ],
 
     userInfo: {
-      name: "",
+      fname: "",
+      lname: "",
       password: "",
       dob: "",
       sex: 0,
@@ -752,6 +753,9 @@ export default {
     expandTimeSlot(i){
       this.showTime =i;
     },
+    selectGender(i){
+      this.userInfo.sex=i;
+    },
     onAppointmentModal(date, time) {
       this.appointmentModal = true;
       this.selectedDate = date;
@@ -765,11 +769,9 @@ export default {
       const payload = {
         phone: this.userInfo.phone,
         password: this.userInfo.password,
-        name: this.userInfo.name,
+        name: this.userInfo.fname + this.userInfo.lname ,
         dob: this.userInfo.dob,
-        sex: this.userInfo.sex,
-        height: this.userInfo.feet * 12 + this.userInfo.inch,
-        weight: parseFloat(this.userInfo.weight)
+        sex: this.userInfo.sex
       };
       await this.$axios
         .$post(request_absolute_uri, payload)
@@ -905,6 +907,11 @@ section {
   border: 1px solid #bbbbbb;
   margin-bottom: 1.5em;
   height: 3.4em;
+}
+
+.activeGender{
+  background: $mainColor!important;
+  color: white;
 }
 .timeSchedule {
   border-radius: 5px;
