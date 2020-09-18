@@ -9,7 +9,7 @@
 </template>
 <style lang="scss" scoped>
 section{
-    background: #cacacf;
+    background:   $backgroundColor;
     border: none;
 }
 .logo{

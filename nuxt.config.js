@@ -76,10 +76,11 @@ export default {
   */
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
+    
     theme: {
       themes: {
         light: {
-          primary: '#22acfe',
+          primary: "#009DFF",
           secondary: '#b0bec5',
           anchor: '#8c9eff',
 

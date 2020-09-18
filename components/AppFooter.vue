@@ -6,7 +6,7 @@
 <style lang="scss" scoped>
 section{
     padding: 1em;
-    background: #22acfe;
+    background: $mainColor;
     color: white;
     text-align: center;
 }

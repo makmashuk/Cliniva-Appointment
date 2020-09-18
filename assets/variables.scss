@@ -1,9 +1,11 @@
-// Ref: https://github.com/nuxt-community/vuetify-module#customvariables
-//
-// The variables you want to modify
-// $font-size-root: 20px;
 
-/* width */
+
+  $backgroundColor: #2B2A2A;
+  $secondaryColor:#D3D4D5;
+  $mainColor: #009DFF;
+  $greenColor:#5CD369;
+
+
 ::-webkit-scrollbar {
     width: 2px;
   }
@@ -15,10 +17,10 @@
   
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #22acfe;
+    background: $mainColor;
   }
   
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #22acfe;
+    background: $mainColor;
   }

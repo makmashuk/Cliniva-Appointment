@@ -7,31 +7,31 @@
             <v-avatar class="profile" size="164">
               <img
                 @error="$event.target.src='https://api.cliniva.com.bd/resources/defaultDoctor.png'"
-                :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.png`"
+                :src="`https://test.cliniva.com.bd/resources/doctorProfilePic/${this.$route.params.id}.jpg`"
                 alt="item.name"
               />
             </v-avatar>
-            <v-list-item light>
+            <v-list-item>
               <v-list-item-content>
                 <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
-                <v-list-item-subtitle>{{doctorInfo.profile.speciality}}</v-list-item-subtitle>
-                <v-list-item-subtitle class="mt-3">{{doctorInfo.profile.professional}}</v-list-item-subtitle>
+                <v-list-item-subtitle class=" white--text">{{doctorInfo.profile.speciality}}</v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-3 white--text">{{doctorInfo.profile.professional}}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-col>
           <v-col cols="12" md="6" class="text-md-right" style="border-left: 1px solid gray;">
-            <v-list-item light class="pl-0">
+            <v-list-item  class="pl-0">
               <v-list-item-content>
-                <v-list-item-subtitle>
+                <v-list-item-subtitle class=" white--text">
                   <strong class="greenText">{{doctorInfo.experience}}</strong> Years Of Experience
                 </v-list-item-subtitle>
-                <v-list-item-subtitle>
+                <v-list-item-subtitle class=" white--text">
                   <strong class="greenText">{{doctorInfo.caseServed}}</strong> Cases Served
                 </v-list-item-subtitle>
-                <v-list-item-subtitle>
+                <v-list-item-subtitle class=" white--text">
                   <i>{{doctorInfo.profile.bio}}</i>
                 </v-list-item-subtitle>
-                <v-list-item-subtitle>
+                <v-list-item-subtitle class=" white--text">
                   <i>{{doctorInfo.profile.academic}}</i>
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -41,7 +41,7 @@
       </div>
     </v-card>
     <div class="container">
-      <p>Video Appointment Booking</p>
+      <p class="font-weight-bold px-5">Video Appointment Booking</p>
       <v-row>
         <v-col
           cols="12"
@@ -50,8 +50,8 @@
           v-for="(item,i) in doctorInfo.schedules"
           :key="i"
         >
-          <div class="datediv">{{ moment(item.date).format("dd, MMM Do")}}</div>
-          <div class="scroll">
+          <div class="datediv" @click="expandTimeSlot(i)">{{ moment(item.date).format("dd, MMM Do")}}</div>
+          <div class="scroll" v-if=" i === showTime">
             <div
               class="timediv"
               @click="onAppointmentModal(item.date,time)"
@@ -72,7 +72,7 @@
         <v-card>
           <div class="container">
             <v-toolbar dark color="primary">
-              <v-toolbar-title>Appointment At - {{ moment(this.selectedDate).format("dddd, MMMM Do YYYY")}} - {{this.selectedTime}}</v-toolbar-title>
+              <v-toolbar-title>Patient Information</v-toolbar-title>
               <v-spacer></v-spacer>
               <v-toolbar-items>
                 <v-btn dark text @click="appointmentModal = false">
@@ -80,27 +80,15 @@
                 </v-btn>
               </v-toolbar-items>
             </v-toolbar>
-            <v-row>
+            <v-row class="flex-column-reverse flex-md-row">
               <v-col md="6">
                 <v-card v-if="!showPaymentPanel" class="pa-5" outlined>
-                  <vue-tel-input class="telInput" defaultCountry="BD" v-model="userInfo.phone"></vue-tel-input>
-
                   <v-row>
                     <v-col>
-                      <v-text-field label="Name" v-model="userInfo.name" solo></v-text-field>
+                      <v-text-field label="Fitst Name" v-model="userInfo.fname" outlined></v-text-field>
                     </v-col>
                     <v-col>
-                      <v-text-field
-                        :append-icon="password ? 'mdi-eye' : 'mdi-eye-off'"
-                        :rules="[rules.required, rules.min]"
-                        :type="password ? 'text' : 'password'"
-                        solo
-                        label="Password"
-                        hint="At least 6 characters"
-                        v-model="userInfo.password"
-                        class="input-group--focused"
-                        @click:append="password = !password"
-                      ></v-text-field>
+                      <v-text-field label="Last Name" v-model="userInfo.lname" outlined></v-text-field>
                     </v-col>
                   </v-row>
                   <v-menu
@@ -115,6 +103,7 @@
                       <v-text-field
                         v-model="userInfo.dob"
                         label="Date Of Birth"
+                        append-icon="event"
                         solo
                         readonly
                         v-bind="attrs"
@@ -131,23 +120,55 @@
                   </v-menu>
 
                   <v-row>
-                    <v-col md="6">
-                      <v-select :items="items" v-model="userInfo.sex" label="Gender" solo></v-select>
+                    <v-col>
+                      <vue-tel-input class="telInput" defaultCountry="BD" v-model="userInfo.phone"></vue-tel-input>
                     </v-col>
-                    <v-col md="6">
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <div>
+                        <v-chip class="mr-2" @click="selectGender(0)">
+                          Male
+                        </v-chip>
+                        <v-chip class="mr-2" @click="selectGender(1)">
+                          Female
+                        </v-chip>
+                        <v-chip class="mr-2" @click="selectGender(2)">
+                          Other
+                        </v-chip>
+                      </div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col md="12">
+                      <!-- <v-select :items="items" v-model="userInfo.sex" label="Gender" solo></v-select> -->
+
+                      <v-text-field
+                        :append-icon="password ? 'mdi-eye' : 'mdi-eye-off'"
+                        :rules="[rules.required, rules.min]"
+                        :type="password ? 'text' : 'password'"
+                        outlined
+                        label="Password"
+                        hint="At least 6 characters"
+                        v-model="userInfo.password"
+                        class="input-group--focused"
+                        @click:append="password = !password"
+                      ></v-text-field>
+                    </v-col>
+                    <!-- <v-col md="6">
                       <v-text-field
                         label="Weight"
                         suffix="kg"
                         number
                         v-model="userInfo.weight"
-                        solo
+                        outlined
                       ></v-text-field>
-                    </v-col>
+                    </v-col>-->
                   </v-row>
-                  <v-row>
+                  <!-- <v-row>
                     <v-col md="6">
                       <v-select
-                        solo
+                        outlined
                         :items="feet"
                         v-model="userInfo.feet"
                         suffix="feet"
@@ -155,9 +176,9 @@
                       ></v-select>
                     </v-col>
                     <v-col md="6">
-                      <v-select solo :items="inch" v-model="userInfo.inch" suffix="inch"></v-select>
+                      <v-select outlined :items="inch" v-model="userInfo.inch" suffix="inch"></v-select>
                     </v-col>
-                  </v-row>
+                  </v-row>-->
 
                   <v-divider></v-divider>
                   <v-card-actions>
@@ -167,7 +188,7 @@
                       :disabled="loadingConfirmAppointment"
                       block
                       @click="confirmAppointment"
-                    >Confirm Appointment</v-btn>
+                    >Confirm Patient Info</v-btn>
                   </v-card-actions>
                 </v-card>
 
@@ -226,9 +247,9 @@
               </v-col>
               <v-col md="4" offset-md="2">
                 <v-card class="appointmentInfo w-100">
-                  <p class="cardTitle text-right h1">Appointment Info</p>
+                  <p class="cardTitle text-md-right h1">Appointment Info</p>
 
-                  <div class="pa-3 text-right">
+                  <div class="pa-3 text-md-right">
                     <v-list-item class="pl-0">
                       <v-list-item-content>
                         <v-list-item-title class="title">{{doctorInfo.name}}</v-list-item-title>
@@ -628,6 +649,8 @@ export default {
     VueTelInput
   },
   data: () => ({
+
+    showTime :null,
     appointmentModal: false,
     feet: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     inch: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
@@ -725,6 +748,10 @@ export default {
     this.initialize();
   },
   methods: {
+
+    expandTimeSlot(i){
+      this.showTime =i;
+    },
     onAppointmentModal(date, time) {
       this.appointmentModal = true;
       this.selectedDate = date;
@@ -751,14 +778,13 @@ export default {
             () => (
               (this.loadingConfirmAppointment = false),
               (this.showPaymentPanel = true)
-            
             ),
             2000
           );
           this.bookedAppointmentData = response.data;
 
           this.patientId = response.data._id;
-        
+
           this.$store.dispatch(
             "snackbar/successMessage",
             `Appointment Booked`,
@@ -858,8 +884,7 @@ export default {
           console.log("appointmentCreate ERR");
         })
         .finally(() => (this.isLoading = false));
-    },
-
+    }
   }
 };
 </script>
@@ -873,14 +898,13 @@ section {
   border-radius: 0;
 }
 .profile {
-  background-color: #cacacf;
+  background-color: $backgroundColor;
+  color: white;
 }
 .telInput {
-  border: none;
-  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
-    0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  border: 1px solid #bbbbbb;
   margin-bottom: 1.5em;
-  height: 3em;
+  height: 3.4em;
 }
 .timeSchedule {
   border-radius: 5px;
@@ -891,29 +915,33 @@ section {
     padding: 0.5em 0;
   }
   .datediv {
-    background: #e2dede;
+    background:   $secondaryColor;
     font-weight: bold;
     padding: 1em 0;
+
+    &:hover{
+      cursor: pointer;
+    }
   }
   .scroll {
-    max-height: 16em;
+    max-height: 20em;
     overflow-y: scroll;
     border: 1px solid gainsboro;
   }
   .timediv {
-    border-bottom: 1px solid #e2dede;
+    border-bottom: 1px solid $secondaryColor;
     &:hover {
       cursor: pointer;
-      background: #22acfe;
+      background: $mainColor;
       color: white;
     }
   }
 }
 .title {
-  color: #22acfe;
+  color: $mainColor;
 }
 .greenText {
-  color: #659463;
+  color: $greenColor;
 }
 table {
   width: 100%;
